@@ -1,0 +1,16 @@
+# Personal settings and secrets
+config.js
+
+# Tizen build output and signing
+*.wgt
+.buildResult/
+.sign/
+author.p12
+distributor.p12
+*.p12
+profiles.xml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
