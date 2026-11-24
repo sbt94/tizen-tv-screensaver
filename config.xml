@@ -2,14 +2,14 @@
 <widget xmlns="http://www.w3.org/ns/widgets"
         xmlns:tizen="http://tizen.org/ns/widgets"
         id="https://github.com/sbt94/tizen-tv-screensaver"
-        version="1.0.1"
+        version="1.0.0"
         viewmodes="maximized">
 
-    <tizen:application id="SbtSaver01.TVScreensaver" package="SbtSaver01" required_version="3.0"/>
+    <tizen:application id="SbtSaverSt.TVScreensaver" package="SbtSaverSt" required_version="3.0"/>
     <tizen:profile name="tv-samsung"/>
 
     <name>TV Screensaver</name>
-    <description>Full screen clock screensaver with rotating backgrounds and burn-in protection</description>
+    <description>Ambient screensaver with photos, paintings, live art and a clock</description>
     <author>Shahar Ben Tov</author>
 
     <content src="index.html"/>
@@ -17,14 +17,12 @@
 
     <feature name="http://tizen.org/feature/screen.size.all"/>
 
-    <!-- Telegram Bot API -->
+    <!-- Photos from Wikimedia Commons and the Art Institute of Chicago -->
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <!-- tizen.power.request -->
     <tizen:privilege name="http://tizen.org/privilege/power"/>
     <!-- Remote control keys -->
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
-    <!-- Exit the app -->
-    <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
 
     <access origin="*" subdomains="true"/>
 

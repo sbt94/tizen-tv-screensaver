@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, height=1080, user-scalable=no">
@@ -37,9 +37,8 @@
                           transition: transform 12s ease-in-out, opacity 0.8s; }
   body.photomode #time { font-size: 120px; font-weight: 300; }
   body.photomode #time .sec { font-size: 40px; }
-  body.photomode #date { font-size: 36px; margin-top: 8px; direction: rtl; text-align: left; unicode-bidi: plaintext; }
-  body.photomode #pair { font-size: 24px; }
-  body.photomode #dim { opacity: 0 !important; }
+  body.photomode #date { font-size: 36px; margin-top: 8px; text-align: left; }
+  body.nocredit #credit { display: none !important; }
 
   #dim { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #000; opacity: 0.2; transition: opacity 0.6s; }
 
@@ -56,47 +55,46 @@
   #time .sec { font-size: 70px; opacity: 0.6; margin-left: 12px; vertical-align: top; }
   #time .colon { animation: blink 2s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0.25; } }
-  #date { margin-top: 18px; font-size: 48px; font-weight: 300; opacity: 0.85; direction: rtl; }
-  #pair { margin-top: 26px; font-size: 30px; opacity: 0.7; direction: rtl; }
+  #date { margin-top: 18px; font-size: 48px; font-weight: 300; opacity: 0.85; unicode-bidi: plaintext; }
 
-  /* ---------- Share mode (Telegram) ---------- */
-  #share {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 50% 40%, #24163a 0%, #05040a 75%); opacity: 0; visibility: hidden; overflow: hidden;
-    transition: opacity 0.8s, visibility 0.8s;
+  /* ---------- Settings panel and exit dialog ---------- */
+  .overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center;
   }
-  #share.on { opacity: 1; visibility: visible; }
-  #shareBlur {
-    position: absolute; top: -5%; left: -5%; width: 110%; height: 110%;
-    background-size: cover; background-position: center;
-    filter: blur(40px) brightness(0.45);
-  }
-  #shareStage {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 10s ease-in-out;
-  }
-  #shareImg, #shareVideo { width: 100%; height: 100%; object-fit: contain; display: none; }
-  #shareText {
-    display: none; max-width: 80%; max-height: 92%; overflow: hidden;
-    background: rgba(0,0,0,0.55); border-radius: 28px; padding: 60px 80px;
-    font-size: 54px; line-height: 1.5; white-space: pre-wrap; text-align: center;
-    unicode-bidi: plaintext;
-  }
-  #shareCaption {
-    position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.6); border-radius: 16px; padding: 14px 36px;
-    font-size: 40px; unicode-bidi: plaintext; display: none; max-width: 85%; text-align: center;
-  }
-  #shareCount { position: absolute; top: 40px; left: 50px; font-size: 26px; opacity: 0.6; direction: ltr; }
-  #miniClock { position: absolute; top: 36px; right: 50px; font-size: 40px; opacity: 0.7; direction: ltr; text-shadow: 0 2px 12px #000; }
+  .overlay.open { display: flex; }
+  .card { background: rgba(22,24,32,0.96); border-radius: 28px; padding: 44px 56px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+  #settingsCard { width: 1000px; }
+  .card h1 { font-size: 46px; font-weight: 300; margin-bottom: 26px; }
+  .row { display: flex; align-items: center; justify-content: space-between; height: 78px; padding: 0 28px;
+         border-radius: 16px; font-size: 32px; }
+  .row .val { opacity: 0.75; white-space: nowrap; }
+  .row .arr { display: inline-block; width: 44px; text-align: center; visibility: hidden; }
+  .row.sel { background: #ffffff; color: #10131a; }
+  .row.sel .val { opacity: 1; font-weight: 500; }
+  .row.sel .arr { visibility: visible; }
+  .hint { margin-top: 26px; font-size: 24px; opacity: 0.6; text-align: center; }
+  .about { margin-top: 10px; font-size: 20px; opacity: 0.45; text-align: center; direction: ltr; }
+  #exitCard { text-align: center; min-width: 620px; }
+  #exitCard h1 { margin-bottom: 36px; }
+  .btn { display: inline-block; min-width: 220px; margin: 0 14px; padding: 18px 30px; border-radius: 14px;
+         font-size: 32px; background: rgba(255,255,255,0.12); }
+  .btn.sel { background: #ffffff; color: #10131a; font-weight: 500; }
+  #helpCard { width: 1100px; }
+  .hrow { display: flex; align-items: center; height: 70px; font-size: 32px; }
+  .hkey { flex: 0 0 300px; font-weight: 500; direction: ltr; text-align: start; }
+  .hdesc { opacity: 0.85; }
+  .hnote { margin-top: 22px; font-size: 26px; line-height: 1.5; opacity: 0.7; }
+  .row .go { opacity: 0.6; }
+  body.rtl .overlay, body.rtl #toast { direction: rtl; }
+  body.rtl .hkey { text-align: right; }
 
   /* ---------- Toast ---------- */
   #toast {
     position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.7); border-radius: 16px; padding: 18px 36px;
-    font-size: 28px; line-height: 1.6; opacity: 0; transition: opacity 0.5s; text-align: center; direction: rtl; white-space: nowrap;
-    z-index: 10;
+    font-size: 28px; line-height: 1.6; opacity: 0; transition: opacity 0.5s; text-align: center; white-space: nowrap;
+    z-index: 30;
   }
   #toast.show { opacity: 1; }
 </style>
@@ -113,63 +111,112 @@
   <div id="clock">
     <div id="time"></div>
     <div id="date"></div>
-    <div id="pair"></div>
   </div>
 
-  <div id="share">
-    <div id="shareBlur"></div>
-    <div id="shareStage">
-      <img id="shareImg" alt="">
-      <video id="shareVideo" playsinline preload="auto"></video>
-      <div id="shareText"></div>
+  <div class="overlay" id="settings">
+    <div class="card" id="settingsCard">
+      <h1 id="settingsTitle"></h1>
+      <div id="settingsRows"></div>
+      <div class="hint" id="settingsHint"></div>
+      <div class="about">v1.0.0 · Photos: Wikimedia Commons · Paintings: Cleveland Museum of Art, Wikimedia Commons</div>
     </div>
-    <div id="shareCaption"></div>
-    <div id="shareCount"></div>
-    <div id="miniClock"></div>
+  </div>
+
+  <div class="overlay" id="help">
+    <div class="card" id="helpCard">
+      <h1 id="helpTitle"></h1>
+      <div id="helpRows"></div>
+      <div class="hnote" id="helpNote"></div>
+      <div class="hint" id="helpClose"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="exitDlg">
+    <div class="card" id="exitCard">
+      <h1 id="exitTitle"></h1>
+      <span class="btn" id="exitYes"></span><span class="btn" id="exitNo"></span>
+    </div>
   </div>
 
   <div id="toast"></div>
 
-<script src="config.js"></script>
 <script>
 (function () {
   'use strict';
 
-  /* ======================= Settings ======================= */
-  // Secrets and personal settings live in config.js (not committed).
-  // Copy config.example.js to config.js and fill it in. Everything is optional.
-  var CFG = window.TV_CONFIG || {};
-  var BOT_TOKEN        = CFG.BOT_TOKEN || '';          // Telegram bot token from @BotFather
-  var ALLOWED_CHAT_IDS = CFG.ALLOWED_CHAT_IDS || [];   // optional; otherwise use /pair <code>
-  // Background mode: 'photos' | 'art' | 'mix' | 'live'
-  var MODE             = CFG.MODE || 'mix';
-  var UNSPLASH_KEY     = CFG.UNSPLASH_KEY || '';       // optional; Wikimedia is used without it
-  var UNSPLASH_QUERY   = CFG.UNSPLASH_QUERY || 'landscape nature';
+  /* ======================= Settings (saved on the TV) ======================= */
+  var DEFAULTS = { mode: 'mix', minutes: 1, seconds: true, h24: true, lang: 'en', credits: true, dim: 0.2 };
+  var settings = (function () {
+    var s = {}, saved = {}, k;
+    try { saved = JSON.parse(localStorage.getItem('settings') || '{}') || {}; } catch (e) {}
+    for (k in DEFAULTS) s[k] = (typeof saved[k] === typeof DEFAULTS[k]) ? saved[k] : DEFAULTS[k];
+    if (['mix', 'photos', 'art', 'live'].indexOf(s.mode) === -1) s.mode = DEFAULTS.mode;
+    if (['en', 'he'].indexOf(s.lang) === -1) s.lang = DEFAULTS.lang;
+    s.minutes = Math.min(120, Math.max(1, s.minutes));
+    s.dim = Math.min(0.85, Math.max(0, s.dim));
+    return s;
+  })();
+  function saveSettings() { try { localStorage.setItem('settings', JSON.stringify(settings)); } catch (e) {} }
+
+  var MODE = settings.mode;
   var WIKI_CATEGORIES = ['Featured_pictures_of_landscapes', 'Featured_pictures_of_mountains', 'Featured_pictures_of_coasts',
                          'Featured_pictures_of_volcanoes', 'Featured_pictures_of_islands', 'Featured_pictures_of_landscapes'];
-  var ART_QUERIES    = ['landscape', 'seascape', 'impressionism', 'garden', 'mountains', 'river', 'japanese landscape', 'sunset'];
-  var PHOTO_MINUTES      = Math.min(120, Math.max(0.25, Number(CFG.PHOTO_MINUTES) || 1));
-  var PHOTO_INTERVAL_MS  = PHOTO_MINUTES * 60 * 1000;   // photo change
-  var BG_INTERVAL_MS     = 2 * 60 * 1000;  // live artwork change
-  var ART_FPS            = 30;             // lower if the TV struggles
+  var WIKI_ART_CATEGORIES = ['Featured_pictures_of_paintings_from_France', 'Featured_pictures_of_paintings_from_Italy',
+                             'Featured_pictures_of_paintings_from_Spain', 'Featured_pictures_of_art'];
+  var ART_FPS            = 30;
   var MOVE_INTERVAL_MS   = 45 * 1000;      // clock shift (anti burn-in)
-  var SHARE_ROTATE_MS    = 20 * 1000;      // rotate between several shared items (videos play to the end)
-  var SHARE_SHIFT_MS     = 60 * 1000;      // tiny shift of shared content (anti burn-in)
-  var SHARE_MAX_HOURS    = 8;              // auto-return to clock (0 = never)
   var POWER_REFRESH_MS   = 5 * 60 * 1000;
+  function photoInterval() { return settings.minutes * 60 * 1000; }
+  function liveInterval()  { return Math.max(2, settings.minutes) * 60 * 1000; }
 
   var CLOCK_COLORS = ['#ffffff', '#f3f6ff', '#fff6ec', '#eefcf6', '#fdf0f6'];
-  var DAYS   = ['יום ראשון','יום שני','יום שלישי','יום רביעי','יום חמישי','יום שישי','שבת'];
-  var MONTHS = ['בינואר','בפברואר','במרץ','באפריל','במאי','ביוני','ביולי','באוגוסט','בספטמבר','באוקטובר','בנובמבר','בדצמבר'];
+
+  /* ======================= Languages ======================= */
+  var I18N = {
+    en: {
+      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+      date: function (d, L) { return L.days[d.getDay()] + ', ' + L.months[d.getMonth()] + ' ' + d.getDate(); },
+      mode: { mix: 'Photos and paintings', photos: 'Photos', art: 'Paintings', live: 'Live art' },
+      brightness: 'Brightness', paused: 'Auto-rotation paused', resumed: 'Auto-rotation on',
+      offline: 'No connection to the photo sources. Showing live art.',
+      help: 'Press OK for settings and help',
+      rowHelp: 'How to use', helpTitle: 'How to use', helpClose: 'Press any button to close',
+      helpRows: [['OK', 'Open settings'], ['◀ ▶', 'Previous or next picture'], ['▲ ▼', 'Brightness'],
+                 ['Play / Pause', 'Keep the current picture on screen'], ['Back', 'Exit']],
+      helpNote: 'The clock moves a little every minute and the pictures change on their own, to protect the screen from burn-in. The screen stays on while the screensaver is open.',
+      settings: 'Settings', hint: '▲ ▼ Select &nbsp;&nbsp; ◀ ▶ Change &nbsp;&nbsp; Back Close',
+      rowMode: 'Background', rowMinutes: 'Change every', rowSeconds: 'Show seconds', rowFormat: 'Time format',
+      rowLang: 'Language', rowCredits: 'Photo credits',
+      on: 'On', off: 'Off', minute: '1 minute', minutes: function (n) { return n + ' minutes'; },
+      h24: '24-hour', h12: '12-hour', exitQ: 'Exit the screensaver?', exit: 'Exit', cancel: 'Cancel'
+    },
+    he: {
+      days: ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'],
+      months: ['בינואר', 'בפברואר', 'במרץ', 'באפריל', 'במאי', 'ביוני', 'ביולי', 'באוגוסט', 'בספטמבר', 'באוקטובר', 'בנובמבר', 'בדצמבר'],
+      date: function (d, L) { return L.days[d.getDay()] + ', ' + d.getDate() + ' ' + L.months[d.getMonth()]; },
+      mode: { mix: 'תמונות וציורים', photos: 'תמונות', art: 'ציורים', live: 'אמנות חיה' },
+      brightness: 'בהירות', paused: 'ההחלפה האוטומטית מושהית', resumed: 'ההחלפה האוטומטית פעילה',
+      offline: 'אין חיבור למקורות התמונות. מוצגת אמנות חיה.',
+      help: 'לחצו OK להגדרות ולהסבר',
+      rowHelp: 'איך משתמשים', helpTitle: 'איך משתמשים', helpClose: 'לחצו על כפתור כלשהו לסגירה',
+      helpRows: [['OK', 'פתיחת ההגדרות'], ['◀ ▶', 'התמונה הקודמת או הבאה'], ['▲ ▼', 'בהירות'],
+                 ['Play / Pause', 'השארת התמונה הנוכחית על המסך'], ['Back', 'יציאה']],
+      helpNote: 'השעון זז מעט כל דקה והתמונות מתחלפות מעצמן, כדי להגן על המסך מצריבה. המסך נשאר דלוק כל עוד שומר המסך פתוח.',
+      settings: 'הגדרות', hint: '▲ ▼ בחירה &nbsp;&nbsp; ◀ ▶ שינוי &nbsp;&nbsp; Back סגירה',
+      rowMode: 'רקע', rowMinutes: 'החלפה כל', rowSeconds: 'הצגת שניות', rowFormat: 'תצוגת שעה',
+      rowLang: 'שפה', rowCredits: 'קרדיט לתמונות',
+      on: 'פועל', off: 'כבוי', minute: 'דקה', minutes: function (n) { return n + ' דקות'; },
+      h24: '24 שעות', h12: '12 שעות', exitQ: 'לצאת משומר המסך?', exit: 'יציאה', cancel: 'ביטול'
+    }
+  };
+  function T() { return I18N[settings.lang]; }
 
   /* ======================= State ======================= */
   var hasTizen = typeof window.tizen !== 'undefined';
-  var showSecs = true, paused = false, dimLevel = 0.2;
+  var paused = false;
   var artIndex = -1;
   var bgTimer, moveTimer, toastTimer;
-
-  var shareItems = [], shareIndex = 0, shareOn = false;
-  var shareRotateTimer, shareShiftTimer, shareMaxTimer;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -187,12 +234,20 @@
   /* ======================= Clock ======================= */
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function renderClock() {
-    var d = new Date();
-    var html = pad(d.getHours()) + '<span class="colon">:</span>' + pad(d.getMinutes());
-    if (showSecs) html += '<span class="sec">' + pad(d.getSeconds()) + '</span>';
+    var d = new Date(), h = d.getHours(), suffix = '';
+    if (!settings.h24) { suffix = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; }
+    var html = (settings.h24 ? pad(h) : h) + '<span class="colon">:</span>' + pad(d.getMinutes());
+    if (settings.seconds) html += '<span class="sec">' + pad(d.getSeconds()) + '</span>';
+    else if (suffix) html += '<span class="sec">' + suffix + '</span>';
     $('time').innerHTML = html;
-    $('date').textContent = DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
-    $('miniClock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    $('date').textContent = T().date(d, T());
+  }
+  function snapClock() {               // reposition at once (no 12-second glide) when the layout changes
+    var c = $('clock'), cr = $('credit');
+    c.style.transition = cr.style.transition = 'none';
+    moveClock();
+    void c.offsetWidth;
+    c.style.transition = cr.style.transition = '';
   }
   function tick() {
     renderClock();
@@ -266,7 +321,7 @@
 
   var SCENES = [
     /* 1. Silk flow field */
-    { name: 'משי', init: function (g, P) {
+    { name: { en: 'Silk', he: 'משי' }, init: function (g, P) {
         g.fillStyle = P.bg; g.fillRect(0, 0, W, H);
         var parts = [];
         for (var i = 0; i < 1100; i++) parts.push({ x: rnd(0, W), y: rnd(0, H), l: rnd(50, 300), c: i % P.c.length });
@@ -293,7 +348,7 @@
       } },
 
     /* 2. Aurora over mountains */
-    { name: 'זוהר צפוני', init: function (g, P) {
+    { name: { en: 'Aurora', he: 'זוהר צפוני' }, init: function (g, P) {
         var sky = offscreen(W, H), s = sky.getContext('2d');
         var gr = s.createLinearGradient(0, 0, 0, H);
         gr.addColorStop(0, '#01020a'); gr.addColorStop(1, mix(P.bg, P.c[3], 0.25));
@@ -332,7 +387,7 @@
       } },
 
     /* 3. Bokeh light orbs */
-    { name: 'אורות', init: function (g, P) {
+    { name: { en: 'Lights', he: 'אורות' }, init: function (g, P) {
         var bg = offscreen(W, H), b = bg.getContext('2d');
         var gr = b.createRadialGradient(W / 2, H / 2, 50, W / 2, H / 2, W * 0.7);
         gr.addColorStop(0, mix(P.bg, P.c[2], 0.25)); gr.addColorStop(1, P.bg);
@@ -356,7 +411,7 @@
       } },
 
     /* 4. Sunset ridges (parallax) */
-    { name: 'שקיעה', init: function (g, P) {
+    { name: { en: 'Sunset', he: 'שקיעה' }, init: function (g, P) {
         var top = mix(P.bg, P.c[2], 0.5), low = P.c[1];
         var sky = offscreen(W, H), s = sky.getContext('2d'), gr = s.createLinearGradient(0, 0, 0, H * 0.75);
         gr.addColorStop(0, mix(P.bg, top, 0.4)); gr.addColorStop(0.55, P.c[0]); gr.addColorStop(1, mix(low, '#ffffff', 0.3));
@@ -386,7 +441,7 @@
       } },
 
     /* 5. Silk ribbons */
-    { name: 'סרטים', init: function (g, P) {
+    { name: { en: 'Ribbons', he: 'סרטים' }, init: function (g, P) {
         var bg = offscreen(W, H), b = bg.getContext('2d'), gr = b.createLinearGradient(0, 0, W, H);
         gr.addColorStop(0, P.bg); gr.addColorStop(1, mix(P.bg, P.c[2], 0.2));
         b.fillStyle = gr; b.fillRect(0, 0, W, H);
@@ -414,7 +469,7 @@
       } },
 
     /* 6. Spiral galaxy */
-    { name: 'גלקסיה', init: function (g, P) {
+    { name: { en: 'Galaxy', he: 'גלקסיה' }, init: function (g, P) {
         g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
         var arms = Math.floor(rnd(2, 4)), groups = [], i;
         for (i = 0; i < P.c.length; i++) groups.push([]);
@@ -461,7 +516,7 @@
     setTimeout(function () {             // stop rendering the faded-out scene
       for (var i = running.length - 1; i >= 0; i--) if (running[i].canvas !== canvas) running.splice(i, 1);
     }, 3200);
-    return scene.name + ' · ' + P.name;
+    return scene.name[settings.lang] + ' · ' + P.name;
   }
 
   function frame(now) {
@@ -494,20 +549,6 @@
   }
   function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
-  function loadUnsplash(cb) {
-    getJSON('https://api.unsplash.com/photos/random?count=30&orientation=landscape&content_filter=high&query=' +
-            encodeURIComponent(UNSPLASH_QUERY) + '&client_id=' + UNSPLASH_KEY, function (err, d) {
-      if (err || !d.length) return cb(err || 'empty');
-      cb(null, d.map(function (p) {
-        return {
-          url: p.urls.raw + '&w=1920&h=1080&fit=crop&q=85', fit: 'cover',
-          title: (p.location && p.location.name) || p.description || p.alt_description || '',
-          sub: 'Photo: ' + p.user.name + ' / Unsplash',
-          track: p.links.download_location ? p.links.download_location + '&client_id=' + UNSPLASH_KEY : ''
-        };
-      }));
-    });
-  }
   function stripHtml(h) {              // parsed in an inert document: nothing in it loads or runs
     var t = '';
     try {
@@ -519,12 +560,13 @@
     catch (e) { t = String(h || '').replace(/<[^>]*>/g, ' '); }
     return t.replace(/\s+/g, ' ').trim();
   }
-  function loadWiki(cb) {
-    var cat = pick(WIKI_CATEGORIES);
+  function loadWiki(cb) { loadCommons(pick(WIKI_CATEGORIES), true, cb); }
+  function loadWikiArt(cb) { loadCommons(pick(WIKI_ART_CATEGORIES), false, cb); }
+  function loadCommons(cat, photos, cb) {
     var letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     getJSON('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*' +
-            '&generator=categorymembers&gcmtype=file&gcmlimit=40&gcmtitle=Category:' + cat +
-            '&gcmstartsortkeyprefix=' + letter +
+            '&generator=categorymembers&gcmtype=file&gcmtitle=Category:' + cat +
+            (photos ? '&gcmlimit=40&gcmstartsortkeyprefix=' + letter : '&gcmlimit=100') +
             '&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1920' +
             '&iiextmetadatafilter=Artist|ObjectName|ImageDescription', function (err, d) {
       if (err || !d.query || !d.query.pages) return cb(err || 'empty');
@@ -533,29 +575,22 @@
         var ii = pages[k].imageinfo && pages[k].imageinfo[0];
         if (!ii || !ii.thumburl || !ii.width || !ii.height) continue;
         var ratio = ii.width / ii.height;
-        if (ratio < 1.25) continue;                       // landscape only
+        if (ratio < (photos ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
         var md = ii.extmetadata || {};
         var title = stripHtml(md.ObjectName && md.ObjectName.value) ||
                     pages[k].title.replace(/^File:/, '').replace(/\.[a-z]+$/i, '').replace(/_/g, ' ');
         var artist = stripHtml(md.Artist && md.Artist.value);
         out.push({
-          url: ii.thumburl, fit: ratio >= 1.45 && ratio <= 2.1 ? 'cover' : 'contain',
+          url: ii.thumburl, fit: photos && ratio >= 1.45 && ratio <= 2.1 ? 'cover' : 'contain',   // never crop a painting
           title: title.length > 70 ? title.slice(0, 67) + '...' : title,
-          sub: (artist ? 'Photo: ' + artist + ' · ' : '') + 'Wikimedia Commons'
+          sub: (artist ? (photos ? 'Photo: ' : '') + artist + ' · ' : '') + 'Wikimedia Commons'
         });
       }
       cb(out.length ? null : 'empty', out);
     });
   }
-  function photoSource() { return UNSPLASH_KEY ? loadUnsplash : loadWiki; }
-  function withFallback(src) {          // Unsplash -> Wikimedia -> Picsum
-    return function (cb) {
-      src(function (err, items) {
-        if (!err) return cb(null, items);
-        if (src !== loadWiki) loadWiki(function (e2, it2) { if (e2) loadPicsum(cb); else cb(null, it2); });
-        else loadPicsum(cb);
-      });
-    };
+  function withFallback(src) {          // Wikimedia -> Picsum
+    return function (cb) { src(function (err, items) { if (err) loadPicsum(cb); else cb(null, items); }); };
   }
 
   function loadPicsum(cb) {
@@ -566,27 +601,31 @@
       }));
     });
   }
-  function loadArt(cb) {
-    var q = pick(ART_QUERIES);
-    getJSON('https://api.artic.edu/api/v1/artworks/search?q=' + encodeURIComponent(q) +
-            '&query[term][is_public_domain]=true&fields=id,title,artist_title,date_display,image_id,thumbnail' +
-            '&limit=50&page=' + (1 + Math.floor(Math.random() * 6)), function (err, d) {
+  function loadCleveland(cb) {
+    getJSON('https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1&type=Painting&limit=100' +
+            '&skip=' + Math.floor(Math.random() * 3800) + '&fields=id,title,creation_date,creators,images', function (err, d) {
       if (err || !d.data || !d.data.length) return cb(err || 'empty');
       var out = [];
       for (var i = 0; i < d.data.length; i++) {
-        var a = d.data[i], th = a.thumbnail;
-        if (!a.image_id || !th || !th.width || !th.height) continue;
-        var ratio = th.width / th.height;
-        if (ratio < 1.15) continue;                       // landscape works only
+        var a = d.data[i], img = a.images && a.images.web;
+        if (!img || !img.url) continue;
+        var ratio = Number(img.width) / Number(img.height);
+        if (!(ratio >= 1.1 && ratio <= 2.6)) continue;      // landscape works only
+        var artist = (a.creators && a.creators[0] && a.creators[0].description) || '';
+        artist = artist.replace(/\s*\(.*$/, '');            // "Name (Swiss, 1827-1901)" -> "Name"
         out.push({
-          url: 'https://www.artic.edu/iiif/2/' + a.image_id + '/full/1686,/0/default.jpg',
-          fit: ratio > 1.6 && ratio < 1.95 ? 'cover' : 'contain',
+          url: img.url, fit: 'contain',
           title: a.title || '',
-          sub: [a.artist_title, a.date_display].filter(Boolean).join(', ') + ' · Art Institute of Chicago'
+          sub: [artist, a.creation_date].filter(Boolean).join(', ') + ' · Cleveland Museum of Art'
         });
       }
       cb(out.length ? null : 'empty', out);
     });
+  }
+  function loadArt(cb) {                // one source, and the other one if it fails
+    var first = Math.random() < 0.65 ? loadCleveland : loadWikiArt;
+    var second = first === loadCleveland ? loadWikiArt : loadCleveland;
+    first(function (err, items) { if (err) second(cb); else cb(null, items); });
   }
 
   var refillWaiters = [], modeGen = 0;
@@ -596,8 +635,8 @@
     loading = true;
     var gen = modeGen, src;
     if (MODE === 'art') src = loadArt;
-    else if (MODE === 'photos') src = withFallback(photoSource());
-    else src = (mixToggle++ % 2) ? loadArt : withFallback(photoSource());
+    else if (MODE === 'photos') src = withFallback(loadWiki);
+    else src = (mixToggle++ % 2) ? loadArt : withFallback(loadWiki);
     src(function (err, items) {
       if (gen !== modeGen) return;              // mode changed meanwhile
       loading = false;
@@ -620,7 +659,7 @@
       pimg.className = 'pimg';                      // restart Ken Burns
       void pimg.offsetWidth;
       pimg.className = 'pimg ' + item.fit;
-      pimg.style.animationDuration = Math.round(PHOTO_INTERVAL_MS / 1000 + 15) + 's';   // slow zoom lasts as long as the photo
+      pimg.style.animationDuration = Math.round(photoInterval() / 1000 + 15) + 's';   // slow zoom lasts as long as the photo
       pimg.style.backgroundImage = 'url("' + item.url + '")';
       layer.classList.add('visible');
       photoLayers[activePhoto].classList.remove('visible');
@@ -631,7 +670,6 @@
         $('creditSub').textContent = item.sub;
         $('credit').style.opacity = 1;
       }, 1200);
-      if (item.track) getJSON(item.track, function () {});   // Unsplash download tracking
     };
     img.onerror = function () { if (gen !== modeGen) return; if (++failCount < 5) nextPhoto(); else photoFallback(); };
     img.src = item.url;
@@ -656,43 +694,41 @@
   var fallbackTimer;
   function photoFallback() {          // no internet: show live art, retry later
     failCount = 0;
-    toast('אין חיבור לתמונות, מציג אמנות חיה', 4000);
+    toast(T().offline, 5000);
     applyMode('live', true);
     clearTimeout(fallbackTimer);
     fallbackTimer = setTimeout(function () { if (wantedMode !== 'live') applyMode(wantedMode); }, 5 * 60 * 1000);
   }
 
-  var MODE_NAMES = { mix: 'תמונות ויצירות', photos: 'תמונות', art: 'יצירות אמנות', live: 'אמנות חיה' };
   var wantedMode = MODE;
   function applyMode(m, temporary) {
-    if (!temporary) wantedMode = m;
+    if (!temporary) { wantedMode = m; settings.mode = m; saveSettings(); }
     modeGen++;
     MODE = m;
     if (m === 'live') {
       document.body.classList.remove('photomode');
       photoLayers[0].classList.remove('visible'); photoLayers[1].classList.remove('visible');
-      if (!shareOn) startArt();
+      startArt();
     } else {
       document.body.classList.add('photomode');
-      if (!shareOn) startArt();                    // keep live art until the first photo arrives
+      startArt();                                  // keep live art until the first photo arrives
       queue = []; refillWaiters = []; loading = false;
       nextPhoto();
     }
-    moveClock();
+    applyDim();
+    snapClock();
     startTimers();
   }
-  function cycleMode() {
-    var order = ['mix', 'photos', 'art', 'live'];
-    applyMode(order[(order.indexOf(wantedMode) + 1) % order.length]);
-    toast(MODE_NAMES[MODE], 2500);
+  function applyDim() {                // photos are shown at full brightness by default
+    $('dim').style.opacity = MODE === 'live' ? settings.dim : Math.max(0, settings.dim - 0.2);
   }
 
   function startTimers() {
     clearInterval(bgTimer); clearInterval(moveTimer);
     bgTimer   = setInterval(function () {
-      if (paused || shareOn) return;
+      if (paused) return;
       if (MODE === 'live') setArt(1); else nextPhoto();
-    }, MODE === 'live' ? BG_INTERVAL_MS : PHOTO_INTERVAL_MS);
+    }, MODE === 'live' ? liveInterval() : photoInterval());
     moveTimer = setInterval(moveClock, MOVE_INTERVAL_MS);
   }
 
@@ -705,266 +741,96 @@
     toastTimer = setTimeout(function () { t.classList.remove('show'); }, ms || 2000);
   }
 
-  /* ======================= Share mode ======================= */
-  function renderShare() {
-    var item = shareItems[shareIndex];
-    if (!item) return;
-    var img = $('shareImg'), vid = $('shareVideo'), txt = $('shareText'), cap = $('shareCaption'), blur = $('shareBlur');
+  /* ======================= Settings panel ======================= */
+  var MINUTE_STEPS = [1, 2, 5, 10, 30];
+  var ROWS = [
+    { label: 'rowMode', key: 'mode', values: ['mix', 'photos', 'art', 'live'],
+      text: function (v) { return T().mode[v]; }, apply: function () { applyMode(settings.mode); } },
+    { label: 'rowMinutes', key: 'minutes', values: MINUTE_STEPS,
+      text: function (v) { return v === 1 ? T().minute : T().minutes(v); }, apply: function () { startTimers(); } },
+    { label: 'rowSeconds', key: 'seconds', values: [true, false],
+      text: function (v) { return v ? T().on : T().off; }, apply: renderClock },
+    { label: 'rowFormat', key: 'h24', values: [true, false],
+      text: function (v) { return v ? T().h24 : T().h12; }, apply: renderClock },
+    { label: 'rowLang', key: 'lang', values: ['en', 'he'],
+      text: function (v) { return v === 'en' ? 'English' : 'עברית'; }, apply: applyLanguage },
+    { label: 'rowCredits', key: 'credits', values: [true, false],
+      text: function (v) { return v ? T().on : T().off; }, apply: applyCredits },
+    { label: 'rowHelp', action: function () { closeSettings(); openHelp(); } }
+  ];
+  var rowIndex = 0, settingsOpen = false, helpOpen = false, exitOpen = false, exitChoice = 1;
 
-    if (item.type !== 'video') { try { vid.pause(); } catch (e) {} vid.removeAttribute('src'); vid.style.display = 'none'; }
-
-    if (item.type === 'image') {
-      txt.style.display = 'none';
-      img.style.display = 'block';
-      img.src = item.url;
-      blur.style.backgroundImage = 'url("' + item.url + '")';
-    } else if (item.type === 'video') {
-      txt.style.display = 'none';
-      img.style.display = 'none';
-      blur.style.backgroundImage = item.thumb ? 'url("' + item.thumb + '")' : 'none';
-      vid.style.display = 'block';
-      vid.muted = !videoSound;
-      vid.loop = shareItems.length === 1;          // single video loops, several play in turn
-      if (vid.getAttribute('src') !== item.url) vid.src = item.url;
-      vid.currentTime = 0;
-      var pr = vid.play(); if (pr && pr.catch) pr.catch(function () { vid.muted = true; vid.play(); });
-    } else {
-      img.style.display = 'none';
-      txt.style.display = 'block';
-      txt.textContent = item.text;
-      if (MODE !== 'live' && currentPhoto) blur.style.backgroundImage = 'url("' + currentPhoto.url + '")';
-      else { try { blur.style.backgroundImage = 'url("' + canvases[activeCanvas].toDataURL('image/jpeg', 0.7) + '")'; } catch (e) {} }
-    }
-
-    if (item.caption) { cap.textContent = item.caption; cap.style.display = 'block'; }
-    else { cap.style.display = 'none'; }
-
-    $('shareCount').textContent = shareItems.length > 1 ? (shareIndex + 1) + ' / ' + shareItems.length : '';
+  function applyLanguage() {
+    document.documentElement.lang = settings.lang;
+    document.body.classList.toggle('rtl', settings.lang === 'he');
+    renderClock();
   }
+  function applyCredits() { document.body.classList.toggle('nocredit', !settings.credits); }
 
-  function shiftShare() {   // few pixels only, invisible to guests
-    var x = Math.round(Math.random() * 24 - 12), y = Math.round(Math.random() * 24 - 12);
-    $('shareStage').style.transform = 'translate(' + x + 'px,' + y + 'px)';
-  }
-
-  function enterShare() {
-    shareOn = true;
-    setTimeout(stopArt, 900);
-    $('share').classList.add('on');
-    $('clock').style.opacity = 0;
-    renderShare();
-    clearInterval(shareRotateTimer); clearInterval(shareShiftTimer); clearTimeout(shareMaxTimer);
-    shareRotateTimer = setInterval(function () {
-      var cur = shareItems[shareIndex];
-      if (cur && cur.type === 'video') return;     // videos advance when they end
-      if (shareItems.length > 1 && !paused) { shareIndex = (shareIndex + 1) % shareItems.length; renderShare(); }
-    }, SHARE_ROTATE_MS);
-    shareShiftTimer = setInterval(shiftShare, SHARE_SHIFT_MS);
-    if (SHARE_MAX_HOURS > 0) shareMaxTimer = setTimeout(exitShare, SHARE_MAX_HOURS * 3600 * 1000);
-  }
-
-  $('shareVideo').addEventListener('ended', function () {
-    if (shareOn && shareItems.length > 1 && !paused) { shareIndex = (shareIndex + 1) % shareItems.length; renderShare(); }
-  });
-  var videoSound = false;
-
-  function exitShare(clearItems) {
-    shareOn = false;
-    try { $('shareVideo').pause(); } catch (e) {}
-    if (MODE === 'live') startArt();
-    $('share').classList.remove('on');
-    $('clock').style.opacity = 1;
-    clearInterval(shareRotateTimer); clearInterval(shareShiftTimer); clearTimeout(shareMaxTimer);
-    if (clearItems) { shareItems = []; shareIndex = 0; }
-    moveClock();
-  }
-
-  function addShareItem(item) {
-    shareItems.push(item);
-    shareIndex = shareItems.length - 1;
-    if (shareOn) renderShare(); else enterShare();
-  }
-
-  /* ======================= Telegram bot ======================= */
-  var API = 'https://api.telegram.org/bot' + BOT_TOKEN + '/';
-  var FILE_API = 'https://api.telegram.org/file/bot' + BOT_TOKEN + '/';
-  var updateOffset = 0;
-  // Pairing: 6-digit code shown on the TV. It is replaced after a few wrong guesses, each chat
-  // gets a limited number of tries, and once a phone is paired new pairings are accepted only
-  // for a few minutes after the red button is pressed on the remote.
-  var PAIR_WINDOW_MS = 5 * 60 * 1000, PAIR_MAX_FAILS = 5;
-  var pairCode = '', pairFails = 0, pairFailsByChat = {}, pairOpenUntil = 0;
-  function newPairCode() {
-    var n;
-    try { var a = new Uint32Array(1); window.crypto.getRandomValues(a); n = a[0] % 1000000; }
-    catch (e) { n = Math.floor(Math.random() * 1000000); }
-    pairCode = ('000000' + n).slice(-6);
-    pairFails = 0;
-  }
-  newPairCode();
-  function pairingOpen() {
-    if (!ALLOWED_CHAT_IDS.length && !pairedChats.length) return true;   // first setup: code is on screen
-    return Date.now() < pairOpenUntil;
-  }
-
-  function loadPaired() {
-    try { return JSON.parse(localStorage.getItem('pairedChats') || '[]'); } catch (e) { return []; }
-  }
-  function savePaired(list) {
-    try { localStorage.setItem('pairedChats', JSON.stringify(list)); } catch (e) {}
-  }
-  var pairedChats = loadPaired();
-
-  function isAllowed(chatId) {
-    return ALLOWED_CHAT_IDS.indexOf(chatId) !== -1 || pairedChats.indexOf(chatId) !== -1;
-  }
-  function updatePairLabel() {
-    var botReady = !!BOT_TOKEN;
-    var needPair = botReady && !ALLOWED_CHAT_IDS.length && !pairedChats.length;
-    $('pair').textContent = needPair ? 'לחיבור טלגרם שלחו לבוט: /pair ' + pairCode : '';
-  }
-
-  function api(method, params, cb, timeoutMs) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', API + method, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.timeout = timeoutMs || 15000;
-    xhr.onload = function () {
-      var res = null;
-      try { res = JSON.parse(xhr.responseText); } catch (e) {}
-      if (cb) cb(res && res.ok ? null : (res || { description: 'bad response' }), res && res.result);
-    };
-    xhr.onerror = xhr.ontimeout = function () { if (cb) cb({ description: 'network' }); };
-    xhr.send(JSON.stringify(params || {}));
-  }
-
-  function reply(chatId, text) { api('sendMessage', { chat_id: chatId, text: text }); }
-
-  function showPhoto(chatId, fileId, caption) {
-    api('getFile', { file_id: fileId }, function (err, file) {
-      if (err || !file) { reply(chatId, 'לא הצלחתי לטעון את התמונה'); return; }
-      addShareItem({ type: 'image', url: FILE_API + file.file_path, caption: caption || '' });
-      reply(chatId, 'מוצג על המסך ✅ (' + shareItems.length + ' פריטים)\n/clock חזרה לשעון');
-    });
-  }
-
-  function showVideo(chatId, v, caption) {
-    if (v.file_size && v.file_size > 20 * 1024 * 1024) {
-      reply(chatId, 'הסרטון גדול מ-20MB, וטלגרם לא מאפשר לבוטים להוריד קבצים כאלה. שלחו גרסה קצרה או דחוסה יותר.');
-      return;
-    }
-    api('getFile', { file_id: v.file_id }, function (err, file) {
-      if (err || !file) { reply(chatId, 'לא הצלחתי לטעון את הסרטון'); return; }
-      var item = { type: 'video', url: FILE_API + file.file_path, caption: caption || '', thumb: '' };
-      var th = v.thumbnail || v.thumb;
-      var done = function () {
-        addShareItem(item);
-        reply(chatId, 'הסרטון מוצג ✅ (' + shareItems.length + ' פריטים)\n' + (videoSound ? '/mute השתקה' : '/sound הפעלת סאונד'));
-      };
-      if (!th) return done();
-      api('getFile', { file_id: th.file_id }, function (e2, tf) { if (!e2 && tf) item.thumb = FILE_API + tf.file_path; done(); });
-    });
-  }
-
-  var HELP_TEXT =
-    'שלחו תמונה, סרטון (עד 20MB) או טקסט חופשי (למשל תפריט), והוא יוצג על המסך.\n' +
-    'כמה תמונות ברצף יתחלפו כל ' + (SHARE_ROTATE_MS / 1000) + ' שניות.\n\n' +
-    '/clock חזרה לשעון וניקוי\n' +
-    '/show הצגה מחדש של הפריטים האחרונים\n' +
-    '/next פריט הבא\n' +
-    '/undo מחיקת הפריט האחרון\n' +
-    '/sound /mute סאונד לסרטונים\n\n' +
-    'רקע: /mix תמונות ויצירות · /photos · /art · /live אמנות חיה';
-
-  function handleMessage(msg) {
-    var chatId = msg.chat.id;
-    var text = (msg.text || '').trim();
-
-    if (text.indexOf('/pair') === 0) {
-      if ((pairFailsByChat[chatId] || 0) >= PAIR_MAX_FAILS) return;      // locked out, stay silent
-      if (!pairingOpen()) {
-        reply(chatId, 'החיבור סגור. לחצו על הכפתור האדום בשלט הטלוויזיה ונסו שוב.');
-        return;
+  function renderSettings() {
+    $('settingsTitle').textContent = T().settings;
+    $('settingsHint').innerHTML = T().hint;
+    var box = $('settingsRows');
+    while (box.firstChild) box.removeChild(box.firstChild);
+    for (var i = 0; i < ROWS.length; i++) {
+      var r = ROWS[i], row = document.createElement('div'), label = document.createElement('span'), val = document.createElement('span');
+      row.className = 'row' + (i === rowIndex ? ' sel' : '');
+      label.textContent = T()[r.label];
+      val.className = 'val';
+      var a1 = document.createElement('span'), tx = document.createElement('span'), a2 = document.createElement('span');
+      if (r.action) { val.className = 'val go'; tx.textContent = 'OK'; val.appendChild(tx); }
+      else {
+        a1.className = a2.className = 'arr'; a1.textContent = '‹'; a2.textContent = '›';
+        tx.textContent = r.text(settings[r.key]);
+        val.appendChild(a1); val.appendChild(tx); val.appendChild(a2);
       }
-      if (text.split(/\s+/)[1] === pairCode) {
-        if (pairedChats.indexOf(chatId) === -1) pairedChats.push(chatId);
-        savePaired(pairedChats);
-        newPairCode(); pairOpenUntil = 0;                                 // one code, one pairing
-        updatePairLabel();
-        reply(chatId, 'מחובר לטלוויזיה 🎉\n\n' + HELP_TEXT);
-        toast('טלגרם מחובר ✅', 3000);
-      } else {
-        pairFailsByChat[chatId] = (pairFailsByChat[chatId] || 0) + 1;
-        if (++pairFails >= PAIR_MAX_FAILS) { newPairCode(); updatePairLabel(); }
-        reply(chatId, 'קוד שגוי. הקוד העדכני מוצג על מסך הטלוויזיה.');
-      }
-      return;
-    }
-    if (!isAllowed(chatId)) {
-      if (text === '/start' || text === '/help') reply(chatId, 'שלחו /pair עם הקוד שמופיע בטלוויזיה.');
-      return;                                                             // ignore strangers
-    }
-
-    if (msg.photo && msg.photo.length) {
-      showPhoto(chatId, msg.photo[msg.photo.length - 1].file_id, msg.caption);
-    } else if (msg.document && /^image\//.test(msg.document.mime_type || '')) {
-      showPhoto(chatId, msg.document.file_id, msg.caption);   // "send as file" = full quality
-    } else if (msg.video || msg.animation || msg.video_note) {
-      showVideo(chatId, msg.video || msg.animation || msg.video_note, msg.caption);
-    } else if (msg.document && /^video\//.test(msg.document.mime_type || '')) {
-      showVideo(chatId, msg.document, msg.caption);
-    } else if (text === '/sound' || text === '/mute') {
-      videoSound = text === '/sound';
-      $('shareVideo').muted = !videoSound;
-      reply(chatId, videoSound ? 'סאונד מופעל 🔊' : 'סאונד מושתק 🔇');
-    } else if (text === '/clock' || text === '/stop') {
-      exitShare(true); reply(chatId, 'חזרה לשעון 🕐');
-    } else if (text === '/show') {
-      if (shareItems.length) { enterShare(); reply(chatId, 'מוצג ✅'); } else reply(chatId, 'אין פריטים להצגה');
-    } else if (text === '/next') {
-      if (shareItems.length) { shareIndex = (shareIndex + 1) % shareItems.length; renderShare(); }
-    } else if (text === '/undo') {
-      shareItems.pop();
-      if (!shareItems.length) { exitShare(true); reply(chatId, 'אין עוד פריטים, חזרה לשעון'); }
-      else { shareIndex = shareItems.length - 1; renderShare(); reply(chatId, 'נמחק. נשארו ' + shareItems.length); }
-    } else if (/^\/(mix|photos|art|live)$/.test(text)) {
-      applyMode(text.slice(1)); reply(chatId, 'מצב: ' + MODE_NAMES[MODE]);
-    } else if (text === '/start' || text === '/help') {
-      reply(chatId, HELP_TEXT);
-    } else if (text && text.charAt(0) !== '/') {
-      addShareItem({ type: 'text', text: text });
-      reply(chatId, 'הטקסט מוצג ✅');
+      row.appendChild(label); row.appendChild(val);
+      box.appendChild(row);
     }
   }
-
-  function poll() {
-    api('getUpdates', { offset: updateOffset, timeout: 30, allowed_updates: ['message'] },
-      function (err, updates) {
-        if (err) {
-          if (err.error_code === 409) toast('לבוט מוגדר webhook. יש להסיר אותו (deleteWebhook)', 5000);
-          setTimeout(poll, 5000);
-          return;
-        }
-        for (var i = 0; i < updates.length; i++) {
-          updateOffset = updates[i].update_id + 1;
-          if (updates[i].message) {
-            try { handleMessage(updates[i].message); } catch (e) { console.log(e); }
-          }
-        }
-        poll();
-      }, 40000);
+  function openSettings() { settingsOpen = true; rowIndex = 0; renderSettings(); $('settings').classList.add('open'); $('toast').classList.remove('show'); }
+  function closeSettings() { settingsOpen = false; $('settings').classList.remove('open'); }
+  function changeSetting(step) {
+    var r = ROWS[rowIndex];
+    if (r.action) return;
+    var i = r.values.indexOf(settings[r.key]);
+    if (i === -1) i = 0;
+    settings[r.key] = r.values[(i + step + r.values.length) % r.values.length];
+    saveSettings();
+    r.apply();
+    renderSettings();
   }
 
-  function startBot() {
-    updatePairLabel();
-    if (!BOT_TOKEN) return;   // bot not configured
-    poll();
+  function openHelp() {
+    helpOpen = true;
+    $('helpTitle').textContent = T().helpTitle;
+    $('helpNote').textContent = T().helpNote;
+    $('helpClose').textContent = T().helpClose;
+    var box = $('helpRows');
+    while (box.firstChild) box.removeChild(box.firstChild);
+    for (var i = 0; i < T().helpRows.length; i++) {
+      var row = document.createElement('div'), k = document.createElement('span'), d = document.createElement('span');
+      row.className = 'hrow'; k.className = 'hkey'; d.className = 'hdesc';
+      k.textContent = T().helpRows[i][0]; d.textContent = T().helpRows[i][1];
+      row.appendChild(k); row.appendChild(d); box.appendChild(row);
+    }
+    $('help').classList.add('open'); $('toast').classList.remove('show');
   }
+  function closeHelp() { helpOpen = false; $('help').classList.remove('open'); }
+
+  function renderExit() {
+    $('exitTitle').textContent = T().exitQ;
+    $('exitYes').textContent = T().exit; $('exitNo').textContent = T().cancel;
+    $('exitYes').className = 'btn' + (exitChoice === 0 ? ' sel' : '');
+    $('exitNo').className = 'btn' + (exitChoice === 1 ? ' sel' : '');
+  }
+  function openExit() { exitOpen = true; exitChoice = 1; renderExit(); $('exitDlg').classList.add('open'); }
+  function closeExit() { exitOpen = false; $('exitDlg').classList.remove('open'); }
 
   /* ======================= Remote control ======================= */
   function registerKeys() {
     if (!hasTizen || !tizen.tvinputdevice) return;
-    var keys = ['MediaPlayPause', 'MediaPlay', 'MediaPause', 'ColorF0Red', 'ColorF1Green', 'Info'];
+    var keys = ['MediaPlayPause', 'MediaPlay', 'MediaPause', 'ColorF0Red', 'Info'];
     for (var i = 0; i < keys.length; i++) {
       try { tizen.tvinputdevice.registerKey(keys[i]); } catch (e) {}
     }
@@ -974,46 +840,57 @@
     if (hasTizen) { try { tizen.application.getCurrentApplication().exit(); return; } catch (e) {} }
     window.close();
   }
-  function showHelp(openPairing) {
-    if (openPairing && BOT_TOKEN) pairOpenUntil = Date.now() + PAIR_WINDOW_MS;
-    toast('◀ ▶ החלפה &nbsp;|&nbsp; ▲ ▼ בהירות &nbsp;|&nbsp; OK שניות<br>' +
-          'ירוק מצב תצוגה &nbsp;|&nbsp; Play/Pause עצירה &nbsp;|&nbsp; Back ' + (shareOn ? 'חזרה לשעון' : 'יציאה') +
-          (BOT_TOKEN && pairingOpen() ? '<br>קוד חיבור טלגרם: /pair ' + pairCode : ''), 8000);
-  }
+  function showHint() { toast(T().help, 8000); }
+
+  var KEY = { BACK: 10009, ESC: 27, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, OK: 13 };
 
   document.addEventListener('keydown', function (e) {
-    switch (e.keyCode) {
-      case 10009: case 27:                 // Back / Esc
-        if (shareOn) exitShare(false); else exitApp();
+    var k = e.keyCode;
+
+    if (exitOpen) {
+      if (k === KEY.LEFT || k === KEY.RIGHT) { exitChoice = 1 - exitChoice; renderExit(); }
+      else if (k === KEY.OK) { if (exitChoice === 0) exitApp(); else closeExit(); }
+      else if (k === KEY.BACK || k === KEY.ESC) closeExit();
+      else return;
+      e.preventDefault(); return;
+    }
+    if (helpOpen) { closeHelp(); e.preventDefault(); return; }
+    if (settingsOpen) {
+      if (k === KEY.UP) { rowIndex = (rowIndex - 1 + ROWS.length) % ROWS.length; renderSettings(); }
+      else if (k === KEY.DOWN) { rowIndex = (rowIndex + 1) % ROWS.length; renderSettings(); }
+      else if (k === KEY.LEFT || k === KEY.RIGHT) {
+        var rtl = settings.lang === 'he', fwd = (k === KEY.RIGHT) !== rtl;
+        changeSetting(fwd ? 1 : -1);
+      }
+      else if (k === KEY.OK && ROWS[rowIndex].action) ROWS[rowIndex].action();
+      else if (k === KEY.OK || k === KEY.BACK || k === KEY.ESC) closeSettings();
+      else return;
+      e.preventDefault(); return;
+    }
+
+    switch (k) {
+      case KEY.BACK: case KEY.ESC:
+        openExit();
         break;
-      case 37: case 39:                    // Left / Right
-        var step = e.keyCode === 39 ? 1 : -1;
-        if (shareOn && shareItems.length) {
-          shareIndex = (shareIndex + step + shareItems.length) % shareItems.length; renderShare();
-        } else {
-          if (MODE === 'live') toast(setArt(step), 2500); else if (step > 0) nextPhoto(); else prevPhoto();
-          startTimers();
-        }
+      case KEY.LEFT: case KEY.RIGHT:
+        var step = k === KEY.RIGHT ? 1 : -1;
+        if (MODE === 'live') toast(setArt(step), 2500); else if (step > 0) nextPhoto(); else prevPhoto();
+        startTimers();
         break;
-      case 38: case 40:                    // Up / Down
-        dimLevel = e.keyCode === 38 ? Math.max(0, dimLevel - 0.1) : Math.min(0.85, dimLevel + 0.1);
-        $('dim').style.opacity = dimLevel;
-        toast('בהירות ' + Math.round((1 - dimLevel) * 100) + '%');
+      case KEY.UP: case KEY.DOWN:
+        settings.dim = Math.round((k === KEY.UP ? Math.max(0, settings.dim - 0.1) : Math.min(0.8, settings.dim + 0.1)) * 10) / 10;
+        saveSettings(); applyDim();
+        toast(T().brightness + ' ' + Math.round((1 - settings.dim) * 100) + '%');
         break;
-      case 13:                             // OK
-        if (!shareOn && shareItems.length) { enterShare(); break; }
-        showSecs = !showSecs; renderClock();
-        toast(showSecs ? 'הצגת שניות' : 'הסתרת שניות');
+      case KEY.OK:
+        openSettings();
         break;
       case 10252: case 415: case 19:       // Play/Pause
         paused = !paused;
-        toast(paused ? 'החלפה אוטומטית מושהית' : 'החלפה אוטומטית פעילה');
+        toast(paused ? T().paused : T().resumed);
         break;
-      case 404:                            // Green = change mode
-        cycleMode();
-        break;
-      case 403: case 457:                  // Red / Info (also opens Telegram pairing for 5 minutes)
-        showHelp(true);
+      case 403: case 457:                  // Red / Info
+        openHelp();
         break;
       default:
         return;
@@ -1024,7 +901,7 @@
   /* ======================= Lifecycle ======================= */
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { releaseScreen(); stopArt(); }
-    else { keepScreenOn(); moveClock(); if (!shareOn && MODE === 'live') startArt(); }
+    else { keepScreenOn(); moveClock(); if (MODE === 'live') startArt(); }
   });
   window.addEventListener('unload', releaseScreen);
 
@@ -1032,14 +909,14 @@
     keepScreenOn();
     setInterval(keepScreenOn, POWER_REFRESH_MS);
     registerKeys();
+    applyLanguage();
+    applyCredits();
     setArt(0, Math.floor(Math.random() * SCENES.length));
     requestAnimationFrame(frame);
     applyMode(MODE);
     tick();
     moveClock();
-    startTimers();
-    startBot();
-    showHelp();
+    showHint();
   };
 })();
 </script>
