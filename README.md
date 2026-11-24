@@ -114,6 +114,7 @@ Edit `config.js`. Every field is optional:
 | `ALLOWED_CHAT_IDS` | Chat IDs allowed to send content. Leave empty and use `/pair` instead. |
 | `MODE` | Starting mode: `mix`, `photos`, `art` or `live` |
 | `PHOTO_MINUTES` | How long each photo or painting stays on screen, in minutes. Default `1`. |
+| `FILL_SCREEN` | `true` (default): pictures fill the whole screen, cropping the edges. `false`: the whole picture on a blurred backdrop. |
 | `UNSPLASH_KEY` | Unsplash Access Key from [unsplash.com/developers](https://unsplash.com/developers) |
 | `UNSPLASH_QUERY` | Unsplash search query, default `landscape nature` |
 

@@ -172,6 +172,7 @@
   var MODE             = CFG.MODE || 'mix';
   var UNSPLASH_KEY     = CFG.UNSPLASH_KEY || '';       // optional; Wikimedia is used without it
   var UNSPLASH_QUERY   = CFG.UNSPLASH_QUERY || 'landscape nature';
+  var FILL_SCREEN      = CFG.FILL_SCREEN !== false;    // true: pictures fill the screen; false: whole picture on a blurred backdrop
   var WIKI_CATEGORIES = ['Featured_pictures_of_landscapes', 'Featured_pictures_of_mountains', 'Featured_pictures_of_coasts',
                          'Featured_pictures_of_volcanoes', 'Featured_pictures_of_islands', 'Featured_pictures_of_landscapes'];
   var WIKI_ART_CATEGORIES = ['Featured_pictures_of_paintings_from_France', 'Featured_pictures_of_paintings_from_Italy',
@@ -569,7 +570,7 @@
         var ii = pages[k].imageinfo && pages[k].imageinfo[0];
         if (!ii || !ii.thumburl || !ii.width || !ii.height) continue;
         var ratio = ii.width / ii.height;
-        if (ratio < (photos ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
+        if (ratio < (photos || FILL_SCREEN ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
         var md = ii.extmetadata || {};
         var title = stripHtml(md.ObjectName && md.ObjectName.value) ||
                     pages[k].title.replace(/^File:/, '').replace(/\.[a-z]+$/i, '').replace(/_/g, ' ');
@@ -608,10 +609,11 @@
       if (err || !d.data || !d.data.length) return cb(err || 'empty');
       var out = [];
       for (var i = 0; i < d.data.length; i++) {
-        var a = d.data[i], img = a.images && a.images.web;
+        var a = d.data[i], img = a.images && a.images.web, big = a.images && a.images.print;
         if (!img || !img.url) continue;
+        if (big && big.url && Number(big.filesize) > 0 && Number(big.filesize) <= 6000000) img = big;   // sharper, if not too heavy
         var ratio = Number(img.width) / Number(img.height);
-        if (!(ratio >= 1.1 && ratio <= 2.6)) continue;      // landscape works only
+        if (!(ratio >= (FILL_SCREEN ? 1.25 : 1.1) && ratio <= 2.6)) continue;      // landscape works only
         var artist = (a.creators && a.creators[0] && a.creators[0].description) || '';
         artist = artist.replace(/\s*\(.*$/, '');            // "Name (Swiss, 1827-1901)" -> "Name"
         out.push({
@@ -656,10 +658,11 @@
       if (MODE !== 'live') stopArt();
       var layer = photoLayers[1 - activePhoto];
       var blur = layer.children[0], pimg = layer.children[1];
-      blur.style.backgroundImage = item.fit === 'contain' ? 'url("' + item.url + '")' : 'none';
+      var fit = FILL_SCREEN ? 'cover' : item.fit;          // fill the screen (crops the edges) or show the whole picture
+      blur.style.backgroundImage = fit === 'contain' ? 'url("' + item.url + '")' : 'none';
       pimg.className = 'pimg';                      // restart Ken Burns
       void pimg.offsetWidth;
-      pimg.className = 'pimg ' + item.fit;
+      pimg.className = 'pimg ' + fit;
       pimg.style.animationDuration = Math.round(PHOTO_INTERVAL_MS / 1000 + 15) + 's';   // slow zoom lasts as long as the photo
       pimg.style.backgroundImage = 'url("' + item.url + '")';
       layer.classList.add('visible');

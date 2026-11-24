@@ -13,6 +13,10 @@ window.TV_CONFIG = {
   // How long each photo or painting stays on screen, in minutes.
   PHOTO_MINUTES: 1,
 
+  // true: photos and paintings fill the whole screen (edges may be cropped).
+  // false: the whole picture is shown on a blurred backdrop.
+  FILL_SCREEN: true,
+
   // Optional: Unsplash Access Key (https://unsplash.com/developers). Without it, photos come from Wikimedia Commons.
   UNSPLASH_KEY: '',
   UNSPLASH_QUERY: 'landscape nature'
