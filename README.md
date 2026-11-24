@@ -31,11 +31,17 @@ A Chromecast-style ambient screen for Samsung Smart TVs (Tizen). It shows beauti
 
 1. Install [VS Code](https://code.visualstudio.com/) and the **Tizen Extension** and **Tizen TV** extensions.
 2. Let the extension install the Tizen SDK, plus **Samsung TV Extensions** and **Samsung Certificate Extension** (version 2.0.73 or later) from the Package Manager.
-3. In **Device Manager**, add the TV by its IP address (port `26101`).
+3. Find the TV's IP address on the TV under **Settings > General > Network > Network Status > IP Settings**. In **Device Manager**, add the TV by that address (port `26101`). The computer and the TV must be on the same network.
 4. In **Certificate Manager**, create a **Samsung** certificate for **TV**. Add your TV's DUID, which you can get with:
    ```
    sdb connect <TV_IP>
    sdb shell 0 getduid
+   ```
+   On Windows, if `sdb` is not recognized, it is installed but not on your `PATH`. Find it and run it by its full path:
+   ```powershell
+   $sdb = (Get-ChildItem C:\, $env:USERPROFILE -Filter sdb.exe -Recurse -Depth 5 -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+   & $sdb connect <TV_IP>
+   & $sdb shell 0 getduid
    ```
 
 ### 3. Configure
@@ -60,7 +66,9 @@ Edit `config.js`. Every field is optional:
 
 Open the folder in VS Code. In the Tizen panel, check that the project, device and certificate are selected under **Active Targets**, then click **Build Project** and **Run Project**.
 
-To open it later, find **TV Screensaver** under **Apps** on the TV. You can add it to the Home bar from there.
+To open it later, find **TV Screensaver** under **Apps** on the TV. To pin it to the Home bar, highlight it, long-press the center button and choose **Add to Home**.
+
+To update the app after changing the code, run **Build Project** and **Run Project** again.
 
 ## Remote control
 
@@ -104,6 +112,7 @@ Shared content returns to the clock automatically after 8 hours.
 
 ## Troubleshooting
 
+- **Build succeeds but Run Project fails**: the connection to the TV usually dropped because the TV was turned off or went to standby. The IP address can stay the same while the connection is gone. Run `sdb connect <TV_IP>`, check that `sdb devices` lists the TV as `device`, then run the project again. If it still fails, make sure Developer mode is still On in the TV's Apps screen.
 - **Install fails with a certificate error**: the TV's DUID is missing from the certificate. Connect the TV first, then recreate the certificate.
 - **The screen still dims**: turn off Eco / energy saving and auto power off in the TV settings.
 - **No photos, only live art**: no internet connection. The app retries every 5 minutes.
