@@ -14,7 +14,7 @@ A Chromecast-style ambient screen for Samsung Smart TVs (Tizen). It shows beauti
 - **Clock and date** (Hebrew date by default) with photo and artist credits
 - **Keeps the screen on** with `tizen.power.request("SCREEN", "SCREEN_NORMAL")`
 - **Burn-in protection**: the clock and credits drift slowly, backgrounds rotate, shared content shifts by a few pixels every minute
-- **Telegram bot**: send a photo or text to your bot and it appears on the TV. No server needed, the TV polls Telegram directly.
+- **Telegram bot**: send a photo, video or text to your bot and it appears on the TV. No server needed, the TV polls Telegram directly.
 - **Remote control support** and automatic fallback to live art when there is no internet
 
 ![Telegram casting](screenshots/telegram.jpg)
@@ -80,8 +80,9 @@ To open it later, find **TV Screensaver** under **Apps** on the TV. You can add 
 2. The TV shows a pairing code under the clock. Send `/pair <code>` to your bot. Pairing is saved on the TV. To pair another phone, press the red button to see the code.
 3. Send:
    - **A photo**: shown full screen, with its caption. Send it as a file for full quality.
+   - **A video or GIF** (up to 20 MB, a Telegram Bot API limit): plays full screen, muted by default. A single video loops.
    - **Text**: shown as a large card, great for a menu.
-   - **Several items**: they rotate every 20 seconds.
+   - **Several items**: they rotate every 20 seconds. Videos play to the end before moving on.
 
 | Command | Action |
 | --- | --- |
@@ -89,6 +90,7 @@ To open it later, find **TV Screensaver** under **Apps** on the TV. You can add 
 | `/show` | Show the shared items again |
 | `/next` | Next item |
 | `/undo` | Remove the last item |
+| `/sound` `/mute` | Turn video sound on or off |
 | `/mix` `/photos` `/art` `/live` | Switch background mode |
 | `/help` | List commands |
 

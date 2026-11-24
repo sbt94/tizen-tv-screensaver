@@ -72,11 +72,11 @@
     filter: blur(40px) brightness(0.45);
   }
   #shareStage {
-    position: absolute; top: 2%; left: 2%; right: 2%; bottom: 2%;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     display: flex; align-items: center; justify-content: center;
     transition: transform 10s ease-in-out;
   }
-  #shareImg { max-width: 100%; max-height: 100%; object-fit: contain; display: none; box-shadow: 0 10px 60px rgba(0,0,0,0.6); }
+  #shareImg, #shareVideo { width: 100%; height: 100%; object-fit: contain; display: none; }
   #shareText {
     display: none; max-width: 80%; max-height: 92%; overflow: hidden;
     background: rgba(0,0,0,0.55); border-radius: 28px; padding: 60px 80px;
@@ -120,6 +120,7 @@
     <div id="shareBlur"></div>
     <div id="shareStage">
       <img id="shareImg" alt="">
+      <video id="shareVideo" playsinline preload="auto"></video>
       <div id="shareText"></div>
     </div>
     <div id="shareCaption"></div>
@@ -151,7 +152,7 @@
   var BG_INTERVAL_MS     = 2 * 60 * 1000;  // live artwork change
   var ART_FPS            = 30;             // lower if the TV struggles
   var MOVE_INTERVAL_MS   = 45 * 1000;      // clock shift (anti burn-in)
-  var SHARE_ROTATE_MS    = 20 * 1000;      // rotate between several shared items
+  var SHARE_ROTATE_MS    = 20 * 1000;      // rotate between several shared items (videos play to the end)
   var SHARE_SHIFT_MS     = 60 * 1000;      // tiny shift of shared content (anti burn-in)
   var SHARE_MAX_HOURS    = 8;              // auto-return to clock (0 = never)
   var POWER_REFRESH_MS   = 5 * 60 * 1000;
@@ -696,13 +697,25 @@
   function renderShare() {
     var item = shareItems[shareIndex];
     if (!item) return;
-    var img = $('shareImg'), txt = $('shareText'), cap = $('shareCaption'), blur = $('shareBlur');
+    var img = $('shareImg'), vid = $('shareVideo'), txt = $('shareText'), cap = $('shareCaption'), blur = $('shareBlur');
+
+    if (item.type !== 'video') { try { vid.pause(); } catch (e) {} vid.removeAttribute('src'); vid.style.display = 'none'; }
 
     if (item.type === 'image') {
       txt.style.display = 'none';
       img.style.display = 'block';
       img.src = item.url;
       blur.style.backgroundImage = 'url("' + item.url + '")';
+    } else if (item.type === 'video') {
+      txt.style.display = 'none';
+      img.style.display = 'none';
+      blur.style.backgroundImage = item.thumb ? 'url("' + item.thumb + '")' : 'none';
+      vid.style.display = 'block';
+      vid.muted = !videoSound;
+      vid.loop = shareItems.length === 1;          // single video loops, several play in turn
+      if (vid.getAttribute('src') !== item.url) vid.src = item.url;
+      vid.currentTime = 0;
+      var pr = vid.play(); if (pr && pr.catch) pr.catch(function () { vid.muted = true; vid.play(); });
     } else {
       img.style.display = 'none';
       txt.style.display = 'block';
@@ -730,14 +743,22 @@
     renderShare();
     clearInterval(shareRotateTimer); clearInterval(shareShiftTimer); clearTimeout(shareMaxTimer);
     shareRotateTimer = setInterval(function () {
+      var cur = shareItems[shareIndex];
+      if (cur && cur.type === 'video') return;     // videos advance when they end
       if (shareItems.length > 1 && !paused) { shareIndex = (shareIndex + 1) % shareItems.length; renderShare(); }
     }, SHARE_ROTATE_MS);
     shareShiftTimer = setInterval(shiftShare, SHARE_SHIFT_MS);
     if (SHARE_MAX_HOURS > 0) shareMaxTimer = setTimeout(exitShare, SHARE_MAX_HOURS * 3600 * 1000);
   }
 
+  $('shareVideo').addEventListener('ended', function () {
+    if (shareOn && shareItems.length > 1 && !paused) { shareIndex = (shareIndex + 1) % shareItems.length; renderShare(); }
+  });
+  var videoSound = false;
+
   function exitShare(clearItems) {
     shareOn = false;
+    try { $('shareVideo').pause(); } catch (e) {}
     if (MODE === 'live') startArt();
     $('share').classList.remove('on');
     $('clock').style.opacity = 1;
@@ -799,13 +820,32 @@
     });
   }
 
+  function showVideo(chatId, v, caption) {
+    if (v.file_size && v.file_size > 20 * 1024 * 1024) {
+      reply(chatId, 'הסרטון גדול מ-20MB, וטלגרם לא מאפשר לבוטים להוריד קבצים כאלה. שלחו גרסה קצרה או דחוסה יותר.');
+      return;
+    }
+    api('getFile', { file_id: v.file_id }, function (err, file) {
+      if (err || !file) { reply(chatId, 'לא הצלחתי לטעון את הסרטון'); return; }
+      var item = { type: 'video', url: FILE_API + file.file_path, caption: caption || '', thumb: '' };
+      var th = v.thumbnail || v.thumb;
+      var done = function () {
+        addShareItem(item);
+        reply(chatId, 'הסרטון מוצג ✅ (' + shareItems.length + ' פריטים)\n' + (videoSound ? '/mute השתקה' : '/sound הפעלת סאונד'));
+      };
+      if (!th) return done();
+      api('getFile', { file_id: th.file_id }, function (e2, tf) { if (!e2 && tf) item.thumb = FILE_API + tf.file_path; done(); });
+    });
+  }
+
   var HELP_TEXT =
-    'שלחו תמונה, או טקסט חופשי (למשל תפריט), והוא יוצג על המסך.\n' +
+    'שלחו תמונה, סרטון (עד 20MB) או טקסט חופשי (למשל תפריט), והוא יוצג על המסך.\n' +
     'כמה תמונות ברצף יתחלפו כל ' + (SHARE_ROTATE_MS / 1000) + ' שניות.\n\n' +
     '/clock חזרה לשעון וניקוי\n' +
     '/show הצגה מחדש של הפריטים האחרונים\n' +
     '/next פריט הבא\n' +
-    '/undo מחיקת הפריט האחרון\n\n' +
+    '/undo מחיקת הפריט האחרון\n' +
+    '/sound /mute סאונד לסרטונים\n\n' +
     'רקע: /mix תמונות ויצירות · /photos · /art · /live אמנות חיה';
 
   function handleMessage(msg) {
@@ -829,6 +869,14 @@
       showPhoto(chatId, msg.photo[msg.photo.length - 1].file_id, msg.caption);
     } else if (msg.document && /^image\//.test(msg.document.mime_type || '')) {
       showPhoto(chatId, msg.document.file_id, msg.caption);   // "send as file" = full quality
+    } else if (msg.video || msg.animation || msg.video_note) {
+      showVideo(chatId, msg.video || msg.animation || msg.video_note, msg.caption);
+    } else if (msg.document && /^video\//.test(msg.document.mime_type || '')) {
+      showVideo(chatId, msg.document, msg.caption);
+    } else if (text === '/sound' || text === '/mute') {
+      videoSound = text === '/sound';
+      $('shareVideo').muted = !videoSound;
+      reply(chatId, videoSound ? 'סאונד מופעל 🔊' : 'סאונד מושתק 🔇');
     } else if (text === '/clock' || text === '/stop') {
       exitShare(true); reply(chatId, 'חזרה לשעון 🕐');
     } else if (text === '/show') {
