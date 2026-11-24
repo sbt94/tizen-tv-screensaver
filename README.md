@@ -155,7 +155,7 @@ Shared content returns to the clock automatically after 8 hours.
 | Button | Screensaver | While showing Telegram content |
 | --- | --- | --- |
 | ◀ ▶ | Previous / next photo or artwork | Previous / next item |
-| ▲ ▼ | Brightness (live mode) | Brightness |
+| ▲ ▼ | Brightness (remembered separately for pictures and for live art) | |
 | OK | Show / hide seconds | |
 | Green | Switch mode | |
 | Play/Pause | Pause auto-rotation | Pause auto-rotation |

@@ -39,7 +39,6 @@
   body.photomode #time .sec { font-size: 40px; }
   body.photomode #date { font-size: 36px; margin-top: 8px; direction: rtl; text-align: left; unicode-bidi: plaintext; }
   body.photomode #pair { font-size: 24px; }
-  body.photomode #dim { opacity: 0 !important; }
 
   #dim { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #000; opacity: 0.2; transition: opacity 0.6s; }
 
@@ -193,7 +192,13 @@
 
   /* ======================= State ======================= */
   var hasTizen = typeof window.tizen !== 'undefined';
-  var showSecs = true, paused = false, dimLevel = 0.2;
+  var showSecs = true, paused = false;
+  var dim = (function () {               // brightness, remembered separately for live art and for pictures
+    var d = { live: 0.2, photo: 0 };
+    try { var v = JSON.parse(localStorage.getItem('dim') || '{}'); if (v.live >= 0 && v.live <= 0.8) d.live = v.live; if (v.photo >= 0 && v.photo <= 0.8) d.photo = v.photo; } catch (e) {}
+    return d;
+  })();
+  function applyDim() { $('dim').style.opacity = MODE === 'live' ? dim.live : dim.photo; }
   var artIndex = -1;
   var bgTimer, moveTimer, toastTimer;
 
@@ -721,6 +726,7 @@
       queue = []; refillWaiters = []; loading = false;
       nextPhoto();
     }
+    applyDim();
     snapClock();
     startTimers();
   }
@@ -1019,7 +1025,7 @@
     window.close();
   }
   var helpOpen = false;
-  var HELP_KEYS = [['◀ ▶', 'התמונה הקודמת או הבאה'], ['▲ ▼', 'בהירות (באמנות חיה)'], ['OK', 'הצגה או הסתרה של שניות'],
+  var HELP_KEYS = [['◀ ▶', 'התמונה הקודמת או הבאה'], ['▲ ▼', 'בהירות'], ['OK', 'הצגה או הסתרה של שניות'],
                    ['ירוק', 'החלפת סוג הרקע'], ['Play / Pause', 'עצירת ההחלפה האוטומטית'], ['Back', 'יציאה, או חזרה לשעון מתוכן שנשלח']];
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
   function openHelp(openPairing) {
@@ -1066,9 +1072,11 @@
         }
         break;
       case 38: case 40:                    // Up / Down
-        dimLevel = e.keyCode === 38 ? Math.max(0, dimLevel - 0.1) : Math.min(0.85, dimLevel + 0.1);
-        $('dim').style.opacity = dimLevel;
-        toast('בהירות ' + Math.round((1 - dimLevel) * 100) + '%');
+        var dk = MODE === 'live' ? 'live' : 'photo';
+        dim[dk] = Math.round((e.keyCode === 38 ? Math.max(0, dim[dk] - 0.1) : Math.min(0.8, dim[dk] + 0.1)) * 10) / 10;
+        try { localStorage.setItem('dim', JSON.stringify(dim)); } catch (e2) {}
+        applyDim();
+        toast('בהירות ' + Math.round((1 - dim[dk]) * 100) + '%');
         break;
       case 13:                             // OK
         if (!shareOn && shareItems.length) { enterShare(); break; }
