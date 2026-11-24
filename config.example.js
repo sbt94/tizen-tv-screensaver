@@ -10,6 +10,9 @@ window.TV_CONFIG = {
   // Background mode on start: 'mix' | 'photos' | 'art' | 'live'
   MODE: 'mix',
 
+  // How long each photo or painting stays on screen, in minutes.
+  PHOTO_MINUTES: 1,
+
   // Optional: Unsplash Access Key (https://unsplash.com/developers). Without it, photos come from Wikimedia Commons.
   UNSPLASH_KEY: '',
   UNSPLASH_QUERY: 'landscape nature'

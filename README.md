@@ -57,6 +57,7 @@ Edit `config.js`. Every field is optional:
 | `BOT_TOKEN` | Telegram bot token from [@BotFather](https://t.me/BotFather) |
 | `ALLOWED_CHAT_IDS` | Chat IDs allowed to send content. Leave empty and use `/pair` instead. |
 | `MODE` | Starting mode: `mix`, `photos`, `art` or `live` |
+| `PHOTO_MINUTES` | How long each photo or painting stays on screen, in minutes. Default `1`. |
 | `UNSPLASH_KEY` | Unsplash Access Key from [unsplash.com/developers](https://unsplash.com/developers) |
 | `UNSPLASH_QUERY` | Unsplash search query, default `landscape nature` |
 
@@ -69,6 +70,48 @@ Open the folder in VS Code. In the Tizen panel, check that the project, device a
 To open it later, find **TV Screensaver** under **Apps** on the TV. To pin it to the Home bar, highlight it, long-press the center button and choose **Add to Home**.
 
 To update the app after changing the code, run **Build Project** and **Run Project** again.
+
+## Install with an AI assistant
+
+Not a developer? Copy this prompt into the AI assistant you like (Claude, ChatGPT, Gemini or another) and it will walk you through the whole installation.
+
+```text
+I want to install an open-source screensaver app on my Samsung Smart TV.
+The project and its instructions are here: https://github.com/sbt94/tizen-tv-screensaver
+If you can open links, read the README there first.
+
+Guide me through the installation as a patient technical helper:
+- First ask me for my TV model (it is under Settings > Support > About This TV) and whether my
+  computer runs Windows or Mac.
+- Give me ONE step at a time and wait until I confirm it worked, or until I send you the error or
+  a screenshot, before you move on.
+- Use simple language and tell me exactly where to click.
+
+The steps, in order:
+1. Download the project from GitHub (Code > Download ZIP) and extract it.
+2. Turn on Developer Mode on the TV: open Apps, type 12345 with the remote (on remotes without
+   number keys, the 123 button opens a keypad; on newer models it is under Apps > App Settings),
+   switch it On, enter my computer's IP address, then restart the TV by holding the power
+   button for 2 seconds.
+3. Install VS Code with the "Tizen Extension" and "Tizen TV" extensions, and let them install the
+   Tizen SDK, Samsung TV Extensions and Samsung Certificate Extension.
+4. Find the TV's IP address (Settings > General > Network > Network Status > IP Settings) and add
+   the TV in the extension's Device Manager with port 26101.
+5. Create a Samsung certificate for TV in Certificate Manager and add the TV's DUID to it. I can
+   get the DUID with "sdb connect <TV_IP>" and then "sdb shell 0 getduid". On Windows, if sdb is
+   not recognized, help me find sdb.exe and run it by its full path.
+6. Copy config.example.js to config.js. Optional: help me create a Telegram bot with @BotFather
+   and put its token in config.js, so I can send photos and text to the TV.
+7. In the Tizen panel of VS Code click Build Project, then Run Project.
+8. Pair my phone: send /pair with the 6-digit code shown on the TV to my bot.
+
+Important:
+- Never ask me to paste my bot token, API keys or passwords into this chat. Tell me where to put
+  them in config.js myself.
+- If Build works but Run fails, the connection to the TV has usually dropped. Have me run
+  "sdb connect <TV_IP>" and try again.
+- If something does not match what I see on my screen, ask me for a screenshot instead of guessing.
+```
 
 ## Remote control
 

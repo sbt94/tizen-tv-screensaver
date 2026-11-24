@@ -148,7 +148,8 @@
   var WIKI_CATEGORIES = ['Featured_pictures_of_landscapes', 'Featured_pictures_of_mountains', 'Featured_pictures_of_coasts',
                          'Featured_pictures_of_volcanoes', 'Featured_pictures_of_islands', 'Featured_pictures_of_landscapes'];
   var ART_QUERIES    = ['landscape', 'seascape', 'impressionism', 'garden', 'mountains', 'river', 'japanese landscape', 'sunset'];
-  var PHOTO_INTERVAL_MS  = 60 * 1000;      // photo change
+  var PHOTO_MINUTES      = Math.min(120, Math.max(0.25, Number(CFG.PHOTO_MINUTES) || 1));
+  var PHOTO_INTERVAL_MS  = PHOTO_MINUTES * 60 * 1000;   // photo change
   var BG_INTERVAL_MS     = 2 * 60 * 1000;  // live artwork change
   var ART_FPS            = 30;             // lower if the TV struggles
   var MOVE_INTERVAL_MS   = 45 * 1000;      // clock shift (anti burn-in)
@@ -619,6 +620,7 @@
       pimg.className = 'pimg';                      // restart Ken Burns
       void pimg.offsetWidth;
       pimg.className = 'pimg ' + item.fit;
+      pimg.style.animationDuration = Math.round(PHOTO_INTERVAL_MS / 1000 + 15) + 's';   // slow zoom lasts as long as the photo
       pimg.style.backgroundImage = 'url("' + item.url + '")';
       layer.classList.add('visible');
       photoLayers[activePhoto].classList.remove('visible');
