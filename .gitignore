@@ -14,3 +14,7 @@ profiles.xml
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Tizen VS Code build output
+Debug/
+.tizen-rds/
