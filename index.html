@@ -145,7 +145,7 @@
   'use strict';
 
   /* ======================= Settings (saved on the TV) ======================= */
-  var DEFAULTS = { mode: 'mix', minutes: 1, seconds: true, h24: true, lang: 'en', credits: true, dim: 0.2 };
+  var DEFAULTS = { mode: 'mix', minutes: 1, seconds: true, h24: true, lang: 'en', credits: true, fill: true, dim: 0.2 };
   var settings = (function () {
     var s = {}, saved = {}, k;
     try { saved = JSON.parse(localStorage.getItem('settings') || '{}') || {}; } catch (e) {}
@@ -187,7 +187,7 @@
       helpNote: 'The clock moves a little every minute and the pictures change on their own, to protect the screen from burn-in. The screen stays on while the screensaver is open.',
       settings: 'Settings', hint: '▲ ▼ Select &nbsp;&nbsp; ◀ ▶ Change &nbsp;&nbsp; Back Close',
       rowMode: 'Background', rowMinutes: 'Change every', rowSeconds: 'Show seconds', rowFormat: 'Time format',
-      rowLang: 'Language', rowCredits: 'Photo credits',
+      rowLang: 'Language', rowCredits: 'Photo credits', rowFill: 'Fill the screen',
       on: 'On', off: 'Off', minute: '1 minute', minutes: function (n) { return n + ' minutes'; },
       h24: '24-hour', h12: '12-hour', exitQ: 'Exit the screensaver?', exit: 'Exit', cancel: 'Cancel'
     },
@@ -205,7 +205,7 @@
       helpNote: 'השעון זז מעט כל דקה והתמונות מתחלפות מעצמן, כדי להגן על המסך מצריבה. המסך נשאר דלוק כל עוד שומר המסך פתוח.',
       settings: 'הגדרות', hint: '▲ ▼ בחירה &nbsp;&nbsp; ◀ ▶ שינוי &nbsp;&nbsp; Back סגירה',
       rowMode: 'רקע', rowMinutes: 'החלפה כל', rowSeconds: 'הצגת שניות', rowFormat: 'תצוגת שעה',
-      rowLang: 'שפה', rowCredits: 'קרדיט לתמונות',
+      rowLang: 'שפה', rowCredits: 'קרדיט לתמונות', rowFill: 'תמונה על מסך מלא',
       on: 'פועל', off: 'כבוי', minute: 'דקה', minutes: function (n) { return n + ' דקות'; },
       h24: '24 שעות', h12: '12 שעות', exitQ: 'לצאת משומר המסך?', exit: 'יציאה', cancel: 'ביטול'
     }
@@ -575,7 +575,7 @@
         var ii = pages[k].imageinfo && pages[k].imageinfo[0];
         if (!ii || !ii.thumburl || !ii.width || !ii.height) continue;
         var ratio = ii.width / ii.height;
-        if (ratio < (photos ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
+        if (ratio < (photos || settings.fill ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
         var md = ii.extmetadata || {};
         var title = stripHtml(md.ObjectName && md.ObjectName.value) ||
                     pages[k].title.replace(/^File:/, '').replace(/\.[a-z]+$/i, '').replace(/_/g, ' ');
@@ -607,10 +607,11 @@
       if (err || !d.data || !d.data.length) return cb(err || 'empty');
       var out = [];
       for (var i = 0; i < d.data.length; i++) {
-        var a = d.data[i], img = a.images && a.images.web;
+        var a = d.data[i], img = a.images && a.images.web, big = a.images && a.images.print;
         if (!img || !img.url) continue;
+        if (big && big.url && Number(big.filesize) > 0 && Number(big.filesize) <= 6000000) img = big;   // sharper, if not too heavy
         var ratio = Number(img.width) / Number(img.height);
-        if (!(ratio >= 1.1 && ratio <= 2.6)) continue;      // landscape works only
+        if (!(ratio >= (settings.fill ? 1.25 : 1.1) && ratio <= 2.6)) continue;      // landscape works only
         var artist = (a.creators && a.creators[0] && a.creators[0].description) || '';
         artist = artist.replace(/\s*\(.*$/, '');            // "Name (Swiss, 1827-1901)" -> "Name"
         out.push({
@@ -655,10 +656,11 @@
       if (MODE !== 'live') stopArt();
       var layer = photoLayers[1 - activePhoto];
       var blur = layer.children[0], pimg = layer.children[1];
-      blur.style.backgroundImage = item.fit === 'contain' ? 'url("' + item.url + '")' : 'none';
+      var fit = settings.fill ? 'cover' : item.fit;          // fill the screen (crops the edges) or show the whole picture
+      blur.style.backgroundImage = fit === 'contain' ? 'url("' + item.url + '")' : 'none';
       pimg.className = 'pimg';                      // restart Ken Burns
       void pimg.offsetWidth;
-      pimg.className = 'pimg ' + item.fit;
+      pimg.className = 'pimg ' + fit;
       pimg.style.animationDuration = Math.round(photoInterval() / 1000 + 15) + 's';   // slow zoom lasts as long as the photo
       pimg.style.backgroundImage = 'url("' + item.url + '")';
       layer.classList.add('visible');
@@ -748,6 +750,8 @@
       text: function (v) { return T().mode[v]; }, apply: function () { applyMode(settings.mode); } },
     { label: 'rowMinutes', key: 'minutes', values: MINUTE_STEPS,
       text: function (v) { return v === 1 ? T().minute : T().minutes(v); }, apply: function () { startTimers(); } },
+    { label: 'rowFill', key: 'fill', values: [true, false],
+      text: function (v) { return v ? T().on : T().off; }, apply: function () { applyMode(settings.mode); } },
     { label: 'rowSeconds', key: 'seconds', values: [true, false],
       text: function (v) { return v ? T().on : T().off; }, apply: renderClock },
     { label: 'rowFormat', key: 'h24', values: [true, false],

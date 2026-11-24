@@ -10,7 +10,7 @@ For the full version with Telegram casting, see the [`main` branch](https://gith
 
 - **Four backgrounds**: photos and paintings together, photos only (Wikimedia Commons Featured Pictures), paintings only (Cleveland Museum of Art open access and Wikimedia Commons), or six animated artworks drawn in code that work offline.
 - **Clock and date** in English or Hebrew, 24-hour or 12-hour, with or without seconds.
-- **Settings screen** opened with OK. Choices are saved on the TV.
+- **Settings screen** opened with OK: background, how often pictures change, full screen or whole picture, clock options, language. Choices are saved on the TV.
 - **How to use** screen, reached from the settings or with the red or Info button.
 - **Keeps the screen on** and protects it from burn-in: the clock drifts, pictures rotate.
 - **Falls back to live art** when there is no internet and retries every 5 minutes.
