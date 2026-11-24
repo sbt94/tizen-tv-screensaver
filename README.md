@@ -77,7 +77,7 @@ To open it later, find **TV Screensaver** under **Apps** on the TV. You can add 
 ## Telegram
 
 1. Create a bot with [@BotFather](https://t.me/BotFather) and put the token in `config.js`.
-2. The TV shows a pairing code under the clock. Send `/pair <code>` to your bot. Pairing is saved on the TV. To pair another phone, press the red button to see the code.
+2. The TV shows a 6-digit pairing code under the clock. Send `/pair <code>` to your bot. Pairing is saved on the TV. To pair another phone, press the red button on the remote: it shows a code and accepts new pairings for 5 minutes.
 3. Send:
    - **A photo**: shown full screen, with its caption. Send it as a file for full quality.
    - **A video or GIF** (up to 20 MB, a Telegram Bot API limit): plays full screen, muted by default. A single video loops.
@@ -95,6 +95,12 @@ To open it later, find **TV Screensaver** under **Apps** on the TV. You can add 
 | `/help` | List commands |
 
 Shared content returns to the clock automatically after 8 hours.
+
+## Security notes
+
+- `config.js` holds your bot token and API key and is ignored by git. The built `.wgt` package contains it too, so do not share your build or upload it anywhere.
+- Only paired chats can put content on the TV. The pairing code changes after 5 wrong guesses, each chat gets 5 tries, and once a phone is paired, new pairings need the red button on the remote.
+- Anyone with your bot token can control the bot. If it leaks, send `/revoke` to [@BotFather](https://t.me/BotFather) and update `config.js`.
 
 ## Troubleshooting
 

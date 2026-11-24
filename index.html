@@ -507,7 +507,17 @@
       }));
     });
   }
-  function stripHtml(h) { var d = document.createElement('div'); d.innerHTML = h || ''; return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function stripHtml(h) {              // parsed in an inert document: nothing in it loads or runs
+    var t = '';
+    try {
+      var doc = new DOMParser().parseFromString(String(h || ''), 'text/html');
+      var junk = doc.querySelectorAll('script,style');
+      for (var i = 0; i < junk.length; i++) junk[i].parentNode.removeChild(junk[i]);
+      t = doc.body.textContent || '';
+    }
+    catch (e) { t = String(h || '').replace(/<[^>]*>/g, ' '); }
+    return t.replace(/\s+/g, ' ').trim();
+  }
   function loadWiki(cb) {
     var cat = pick(WIKI_CATEGORIES);
     var letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
@@ -777,7 +787,23 @@
   var API = 'https://api.telegram.org/bot' + BOT_TOKEN + '/';
   var FILE_API = 'https://api.telegram.org/file/bot' + BOT_TOKEN + '/';
   var updateOffset = 0;
-  var pairCode = String(1000 + Math.floor(Math.random() * 9000));
+  // Pairing: 6-digit code shown on the TV. It is replaced after a few wrong guesses, each chat
+  // gets a limited number of tries, and once a phone is paired new pairings are accepted only
+  // for a few minutes after the red button is pressed on the remote.
+  var PAIR_WINDOW_MS = 5 * 60 * 1000, PAIR_MAX_FAILS = 5;
+  var pairCode = '', pairFails = 0, pairFailsByChat = {}, pairOpenUntil = 0;
+  function newPairCode() {
+    var n;
+    try { var a = new Uint32Array(1); window.crypto.getRandomValues(a); n = a[0] % 1000000; }
+    catch (e) { n = Math.floor(Math.random() * 1000000); }
+    pairCode = ('000000' + n).slice(-6);
+    pairFails = 0;
+  }
+  newPairCode();
+  function pairingOpen() {
+    if (!ALLOWED_CHAT_IDS.length && !pairedChats.length) return true;   // first setup: code is on screen
+    return Date.now() < pairOpenUntil;
+  }
 
   function loadPaired() {
     try { return JSON.parse(localStorage.getItem('pairedChats') || '[]'); } catch (e) { return []; }
@@ -853,17 +879,29 @@
     var text = (msg.text || '').trim();
 
     if (text.indexOf('/pair') === 0) {
+      if ((pairFailsByChat[chatId] || 0) >= PAIR_MAX_FAILS) return;      // locked out, stay silent
+      if (!pairingOpen()) {
+        reply(chatId, 'החיבור סגור. לחצו על הכפתור האדום בשלט הטלוויזיה ונסו שוב.');
+        return;
+      }
       if (text.split(/\s+/)[1] === pairCode) {
         if (pairedChats.indexOf(chatId) === -1) pairedChats.push(chatId);
-        savePaired(pairedChats); updatePairLabel();
+        savePaired(pairedChats);
+        newPairCode(); pairOpenUntil = 0;                                 // one code, one pairing
+        updatePairLabel();
         reply(chatId, 'מחובר לטלוויזיה 🎉\n\n' + HELP_TEXT);
         toast('טלגרם מחובר ✅', 3000);
       } else {
-        reply(chatId, 'קוד שגוי. הקוד מוצג על מסך הטלוויזיה.');
+        pairFailsByChat[chatId] = (pairFailsByChat[chatId] || 0) + 1;
+        if (++pairFails >= PAIR_MAX_FAILS) { newPairCode(); updatePairLabel(); }
+        reply(chatId, 'קוד שגוי. הקוד העדכני מוצג על מסך הטלוויזיה.');
       }
       return;
     }
-    if (!isAllowed(chatId)) { reply(chatId, 'אין הרשאה. שלחו /pair עם הקוד שמופיע בטלוויזיה.'); return; }
+    if (!isAllowed(chatId)) {
+      if (text === '/start' || text === '/help') reply(chatId, 'שלחו /pair עם הקוד שמופיע בטלוויזיה.');
+      return;                                                             // ignore strangers
+    }
 
     if (msg.photo && msg.photo.length) {
       showPhoto(chatId, msg.photo[msg.photo.length - 1].file_id, msg.caption);
@@ -934,10 +972,11 @@
     if (hasTizen) { try { tizen.application.getCurrentApplication().exit(); return; } catch (e) {} }
     window.close();
   }
-  function showHelp() {
+  function showHelp(openPairing) {
+    if (openPairing && BOT_TOKEN) pairOpenUntil = Date.now() + PAIR_WINDOW_MS;
     toast('◀ ▶ החלפה &nbsp;|&nbsp; ▲ ▼ בהירות &nbsp;|&nbsp; OK שניות<br>' +
           'ירוק מצב תצוגה &nbsp;|&nbsp; Play/Pause עצירה &nbsp;|&nbsp; Back ' + (shareOn ? 'חזרה לשעון' : 'יציאה') +
-          (BOT_TOKEN ? '<br>קוד חיבור טלגרם: /pair ' + pairCode : ''), 6000);
+          (BOT_TOKEN && pairingOpen() ? '<br>קוד חיבור טלגרם: /pair ' + pairCode : ''), 8000);
   }
 
   document.addEventListener('keydown', function (e) {
@@ -971,8 +1010,8 @@
       case 404:                            // Green = change mode
         cycleMode();
         break;
-      case 403: case 457:                  // Red / Info
-        showHelp();
+      case 403: case 457:                  // Red / Info (also opens Telegram pairing for 5 minutes)
+        showHelp(true);
         break;
       default:
         return;
