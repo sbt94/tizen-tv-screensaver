@@ -145,7 +145,7 @@
   'use strict';
 
   /* ======================= Settings (saved on the TV) ======================= */
-  var DEFAULTS = { mode: 'mix', minutes: 1, seconds: true, h24: true, lang: 'en', credits: true, fill: true, dim: 0.2 };
+  var DEFAULTS = { mode: 'mix', minutes: 1, seconds: true, h24: true, lang: 'en', credits: true, fill: true, dim: 0.2, dimPhoto: 0 };
   var settings = (function () {
     var s = {}, saved = {}, k;
     try { saved = JSON.parse(localStorage.getItem('settings') || '{}') || {}; } catch (e) {}
@@ -153,7 +153,8 @@
     if (['mix', 'photos', 'art', 'live'].indexOf(s.mode) === -1) s.mode = DEFAULTS.mode;
     if (['en', 'he'].indexOf(s.lang) === -1) s.lang = DEFAULTS.lang;
     s.minutes = Math.min(120, Math.max(1, s.minutes));
-    s.dim = Math.min(0.85, Math.max(0, s.dim));
+    s.dim = Math.min(0.8, Math.max(0, s.dim));
+    s.dimPhoto = Math.min(0.8, Math.max(0, s.dimPhoto));
     return s;
   })();
   function saveSettings() { try { localStorage.setItem('settings', JSON.stringify(settings)); } catch (e) {} }
@@ -721,8 +722,8 @@
     snapClock();
     startTimers();
   }
-  function applyDim() {                // photos are shown at full brightness by default
-    $('dim').style.opacity = MODE === 'live' ? settings.dim : Math.max(0, settings.dim - 0.2);
+  function applyDim() {                // brightness is remembered separately for live art and for pictures
+    $('dim').style.opacity = MODE === 'live' ? settings.dim : settings.dimPhoto;
   }
 
   function startTimers() {
@@ -882,9 +883,10 @@
         startTimers();
         break;
       case KEY.UP: case KEY.DOWN:
-        settings.dim = Math.round((k === KEY.UP ? Math.max(0, settings.dim - 0.1) : Math.min(0.8, settings.dim + 0.1)) * 10) / 10;
+        var dk = MODE === 'live' ? 'dim' : 'dimPhoto';
+        settings[dk] = Math.round((k === KEY.UP ? Math.max(0, settings[dk] - 0.1) : Math.min(0.8, settings[dk] + 0.1)) * 10) / 10;
         saveSettings(); applyDim();
-        toast(T().brightness + ' ' + Math.round((1 - settings.dim) * 100) + '%');
+        toast(T().brightness + ' ' + Math.round((1 - settings[dk]) * 100) + '%');
         break;
       case KEY.OK:
         openSettings();
