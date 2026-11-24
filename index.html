@@ -91,6 +91,22 @@
   #shareCount { position: absolute; top: 40px; left: 50px; font-size: 26px; opacity: 0.6; direction: ltr; }
   #miniClock { position: absolute; top: 36px; right: 50px; font-size: 40px; opacity: 0.7; direction: ltr; text-shadow: 0 2px 12px #000; }
 
+  /* ---------- Help screen ---------- */
+  #help {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; direction: rtl;
+    background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
+  }
+  #help.open { display: flex; }
+  #helpCard { width: 1240px; background: rgba(22,24,32,0.96); border-radius: 28px; padding: 40px 56px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+  #helpCard h1 { font-size: 44px; font-weight: 300; margin-bottom: 14px; }
+  #helpCard h2 { font-size: 30px; font-weight: 500; margin: 22px 0 6px; opacity: 0.9; }
+  .hrow { display: flex; align-items: center; height: 52px; font-size: 28px; }
+  .hkey { flex: 0 0 300px; font-weight: 500; direction: ltr; text-align: right; }
+  .hdesc { opacity: 0.85; }
+  .htext { font-size: 28px; line-height: 1.6; opacity: 0.85; }
+  .htext b { font-weight: 500; display: inline-block; direction: ltr; unicode-bidi: isolate; }
+  .hclose { margin-top: 22px; font-size: 22px; opacity: 0.55; text-align: center; }
+
   /* ---------- Toast ---------- */
   #toast {
     position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
@@ -128,6 +144,17 @@
     <div id="miniClock"></div>
   </div>
 
+  <div id="help">
+    <div id="helpCard">
+      <h1>איך משתמשים</h1>
+      <h2>שלט</h2>
+      <div id="helpKeys"></div>
+      <h2>שליחה מהטלפון בטלגרם</h2>
+      <div class="htext" id="helpBot"></div>
+      <div class="hclose">לחצו על כפתור כלשהו לסגירה</div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
 <script src="config.js"></script>
@@ -147,7 +174,8 @@
   var UNSPLASH_QUERY   = CFG.UNSPLASH_QUERY || 'landscape nature';
   var WIKI_CATEGORIES = ['Featured_pictures_of_landscapes', 'Featured_pictures_of_mountains', 'Featured_pictures_of_coasts',
                          'Featured_pictures_of_volcanoes', 'Featured_pictures_of_islands', 'Featured_pictures_of_landscapes'];
-  var ART_QUERIES    = ['landscape', 'seascape', 'impressionism', 'garden', 'mountains', 'river', 'japanese landscape', 'sunset'];
+  var WIKI_ART_CATEGORIES = ['Featured_pictures_of_paintings_from_France', 'Featured_pictures_of_paintings_from_Italy',
+                             'Featured_pictures_of_paintings_from_Spain', 'Featured_pictures_of_art'];
   var PHOTO_MINUTES      = Math.min(120, Math.max(0.25, Number(CFG.PHOTO_MINUTES) || 1));
   var PHOTO_INTERVAL_MS  = PHOTO_MINUTES * 60 * 1000;   // photo change
   var BG_INTERVAL_MS     = 2 * 60 * 1000;  // live artwork change
@@ -193,6 +221,13 @@
     $('time').innerHTML = html;
     $('date').textContent = DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
     $('miniClock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function snapClock() {               // reposition at once (no 12-second glide) when the layout changes
+    var c = $('clock'), cr = $('credit');
+    c.style.transition = cr.style.transition = 'none';
+    moveClock();
+    void c.offsetWidth;
+    c.style.transition = cr.style.transition = '';
   }
   function tick() {
     renderClock();
@@ -519,12 +554,13 @@
     catch (e) { t = String(h || '').replace(/<[^>]*>/g, ' '); }
     return t.replace(/\s+/g, ' ').trim();
   }
-  function loadWiki(cb) {
-    var cat = pick(WIKI_CATEGORIES);
+  function loadWiki(cb) { loadCommons(pick(WIKI_CATEGORIES), true, cb); }
+  function loadWikiArt(cb) { loadCommons(pick(WIKI_ART_CATEGORIES), false, cb); }
+  function loadCommons(cat, photos, cb) {
     var letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     getJSON('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*' +
-            '&generator=categorymembers&gcmtype=file&gcmlimit=40&gcmtitle=Category:' + cat +
-            '&gcmstartsortkeyprefix=' + letter +
+            '&generator=categorymembers&gcmtype=file&gcmtitle=Category:' + cat +
+            (photos ? '&gcmlimit=40&gcmstartsortkeyprefix=' + letter : '&gcmlimit=100') +
             '&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1920' +
             '&iiextmetadatafilter=Artist|ObjectName|ImageDescription', function (err, d) {
       if (err || !d.query || !d.query.pages) return cb(err || 'empty');
@@ -533,15 +569,15 @@
         var ii = pages[k].imageinfo && pages[k].imageinfo[0];
         if (!ii || !ii.thumburl || !ii.width || !ii.height) continue;
         var ratio = ii.width / ii.height;
-        if (ratio < 1.25) continue;                       // landscape only
+        if (ratio < (photos ? 1.25 : 1.1) || ratio > 2.6) continue;   // landscape only
         var md = ii.extmetadata || {};
         var title = stripHtml(md.ObjectName && md.ObjectName.value) ||
                     pages[k].title.replace(/^File:/, '').replace(/\.[a-z]+$/i, '').replace(/_/g, ' ');
         var artist = stripHtml(md.Artist && md.Artist.value);
         out.push({
-          url: ii.thumburl, fit: ratio >= 1.45 && ratio <= 2.1 ? 'cover' : 'contain',
+          url: ii.thumburl, fit: photos && ratio >= 1.45 && ratio <= 2.1 ? 'cover' : 'contain',   // never crop a painting
           title: title.length > 70 ? title.slice(0, 67) + '...' : title,
-          sub: (artist ? 'Photo: ' + artist + ' · ' : '') + 'Wikimedia Commons'
+          sub: (artist ? (photos ? 'Photo: ' : '') + artist + ' · ' : '') + 'Wikimedia Commons'
         });
       }
       cb(out.length ? null : 'empty', out);
@@ -566,27 +602,31 @@
       }));
     });
   }
-  function loadArt(cb) {
-    var q = pick(ART_QUERIES);
-    getJSON('https://api.artic.edu/api/v1/artworks/search?q=' + encodeURIComponent(q) +
-            '&query[term][is_public_domain]=true&fields=id,title,artist_title,date_display,image_id,thumbnail' +
-            '&limit=50&page=' + (1 + Math.floor(Math.random() * 6)), function (err, d) {
+  function loadCleveland(cb) {
+    getJSON('https://openaccess-api.clevelandart.org/api/artworks/?cc0=1&has_image=1&type=Painting&limit=100' +
+            '&skip=' + Math.floor(Math.random() * 3800) + '&fields=id,title,creation_date,creators,images', function (err, d) {
       if (err || !d.data || !d.data.length) return cb(err || 'empty');
       var out = [];
       for (var i = 0; i < d.data.length; i++) {
-        var a = d.data[i], th = a.thumbnail;
-        if (!a.image_id || !th || !th.width || !th.height) continue;
-        var ratio = th.width / th.height;
-        if (ratio < 1.15) continue;                       // landscape works only
+        var a = d.data[i], img = a.images && a.images.web;
+        if (!img || !img.url) continue;
+        var ratio = Number(img.width) / Number(img.height);
+        if (!(ratio >= 1.1 && ratio <= 2.6)) continue;      // landscape works only
+        var artist = (a.creators && a.creators[0] && a.creators[0].description) || '';
+        artist = artist.replace(/\s*\(.*$/, '');            // "Name (Swiss, 1827-1901)" -> "Name"
         out.push({
-          url: 'https://www.artic.edu/iiif/2/' + a.image_id + '/full/1686,/0/default.jpg',
-          fit: ratio > 1.6 && ratio < 1.95 ? 'cover' : 'contain',
+          url: img.url, fit: 'contain',
           title: a.title || '',
-          sub: [a.artist_title, a.date_display].filter(Boolean).join(', ') + ' · Art Institute of Chicago'
+          sub: [artist, a.creation_date].filter(Boolean).join(', ') + ' · Cleveland Museum of Art'
         });
       }
       cb(out.length ? null : 'empty', out);
     });
+  }
+  function loadArt(cb) {                // one source, and the other one if it fails
+    var first = Math.random() < 0.65 ? loadCleveland : loadWikiArt;
+    var second = first === loadCleveland ? loadWikiArt : loadCleveland;
+    first(function (err, items) { if (err) second(cb); else cb(null, items); });
   }
 
   var refillWaiters = [], modeGen = 0;
@@ -656,7 +696,7 @@
   var fallbackTimer;
   function photoFallback() {          // no internet: show live art, retry later
     failCount = 0;
-    toast('אין חיבור לתמונות, מציג אמנות חיה', 4000);
+    toast('לא הצלחתי לטעון תמונות. מוצגת אמנות חיה.', 5000);
     applyMode('live', true);
     clearTimeout(fallbackTimer);
     fallbackTimer = setTimeout(function () { if (wantedMode !== 'live') applyMode(wantedMode); }, 5 * 60 * 1000);
@@ -678,7 +718,7 @@
       queue = []; refillWaiters = []; loading = false;
       nextPhoto();
     }
-    moveClock();
+    snapClock();
     startTimers();
   }
   function cycleMode() {
@@ -788,7 +828,7 @@
   /* ======================= Telegram bot ======================= */
   var API = 'https://api.telegram.org/bot' + BOT_TOKEN + '/';
   var FILE_API = 'https://api.telegram.org/file/bot' + BOT_TOKEN + '/';
-  var updateOffset = 0;
+  var updateOffset = 0, botName = '';
   // Pairing: 6-digit code shown on the TV. It is replaced after a few wrong guesses, each chat
   // gets a limited number of tries, and once a phone is paired new pairings are accepted only
   // for a few minutes after the red button is pressed on the remote.
@@ -821,7 +861,7 @@
   function updatePairLabel() {
     var botReady = !!BOT_TOKEN;
     var needPair = botReady && !ALLOWED_CHAT_IDS.length && !pairedChats.length;
-    $('pair').textContent = needPair ? 'לחיבור טלגרם שלחו לבוט: /pair ' + pairCode : '';
+    $('pair').textContent = needPair ? 'לחיבור טלגרם שלחו ל' + (botName ? '-@' + botName : 'בוט') + ': /pair ' + pairCode : '';
   }
 
   function api(method, params, cb, timeoutMs) {
@@ -958,6 +998,7 @@
   function startBot() {
     updatePairLabel();
     if (!BOT_TOKEN) return;   // bot not configured
+    api('getMe', {}, function (err, me) { if (!err && me && me.username) { botName = me.username; updatePairLabel(); } });
     poll();
   }
 
@@ -974,14 +1015,40 @@
     if (hasTizen) { try { tizen.application.getCurrentApplication().exit(); return; } catch (e) {} }
     window.close();
   }
-  function showHelp(openPairing) {
+  var helpOpen = false;
+  var HELP_KEYS = [['◀ ▶', 'התמונה הקודמת או הבאה'], ['▲ ▼', 'בהירות (באמנות חיה)'], ['OK', 'הצגה או הסתרה של שניות'],
+                   ['ירוק', 'החלפת סוג הרקע'], ['Play / Pause', 'עצירת ההחלפה האוטומטית'], ['Back', 'יציאה, או חזרה לשעון מתוכן שנשלח']];
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+  function openHelp(openPairing) {
     if (openPairing && BOT_TOKEN) pairOpenUntil = Date.now() + PAIR_WINDOW_MS;
-    toast('◀ ▶ החלפה &nbsp;|&nbsp; ▲ ▼ בהירות &nbsp;|&nbsp; OK שניות<br>' +
-          'ירוק מצב תצוגה &nbsp;|&nbsp; Play/Pause עצירה &nbsp;|&nbsp; Back ' + (shareOn ? 'חזרה לשעון' : 'יציאה') +
-          (BOT_TOKEN && pairingOpen() ? '<br>קוד חיבור טלגרם: /pair ' + pairCode : ''), 8000);
+    var keys = $('helpKeys'), bot = $('helpBot'), i;
+    while (keys.firstChild) keys.removeChild(keys.firstChild);
+    while (bot.firstChild) bot.removeChild(bot.firstChild);
+    for (i = 0; i < HELP_KEYS.length; i++) {
+      var row = el('div', 'hrow');
+      row.appendChild(el('span', 'hkey', HELP_KEYS[i][0])); row.appendChild(el('span', 'hdesc', HELP_KEYS[i][1]));
+      keys.appendChild(row);
+    }
+    function line(parts) {               // strings are plain text, arrays are highlighted
+      var d = el('div');
+      for (var k = 0; k < parts.length; k++) d.appendChild(typeof parts[k] === 'string' ? document.createTextNode(parts[k]) : el('b', '', parts[k][0]));
+      bot.appendChild(d);
+    }
+    if (!BOT_TOKEN) {
+      line(['כדי לשלוח תמונות, סרטונים וטקסט מהטלפון, מגדירים בוט טלגרם בקובץ config.js. ההסבר נמצא ב-README של הפרויקט.']);
+    } else {
+      line(botName ? ['שלחו ל-', ['@' + botName], ' תמונה, סרטון או טקסט, והם יוצגו כאן במסך מלא.']
+                   : ['שלחו לבוט תמונה, סרטון או טקסט, והם יוצגו כאן במסך מלא.']);
+      if (pairingOpen()) line(['חיבור טלפון חדש: שלחו לבוט ', ['/pair ' + pairCode], ' (הקוד בתוקף ל-5 דקות).']);
+      line(['פקודות: ', ['/clock'], ' חזרה לשעון, ', ['/undo'], ' מחיקת האחרון, ', ['/sound'], ' סאונד לסרטונים, ', ['/mix'], ' ', ['/photos'], ' ', ['/art'], ' ', ['/live'], ' סוג הרקע.']);
+    }
+    helpOpen = true;
+    $('help').classList.add('open'); $('toast').classList.remove('show');
   }
+  function closeHelp() { helpOpen = false; $('help').classList.remove('open'); }
 
   document.addEventListener('keydown', function (e) {
+    if (helpOpen) { closeHelp(); e.preventDefault(); return; }
     switch (e.keyCode) {
       case 10009: case 27:                 // Back / Esc
         if (shareOn) exitShare(false); else exitApp();
@@ -1013,7 +1080,7 @@
         cycleMode();
         break;
       case 403: case 457:                  // Red / Info (also opens Telegram pairing for 5 minutes)
-        showHelp(true);
+        openHelp(true);
         break;
       default:
         return;
@@ -1039,7 +1106,7 @@
     moveClock();
     startTimers();
     startBot();
-    showHelp();
+    toast('הכפתור האדום או Info: הסבר ועזרה', 7000);
   };
 })();
 </script>
